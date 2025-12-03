@@ -1,5 +1,6 @@
 package com.jchat.mem.controller;
 
+import com.jchat.common.annotation.NoAuth;
 import com.jchat.mem.dto.SearchUserReqDto;
 import com.jchat.mem.dto.SearchUserResDto;
 import com.jchat.mem.service.MemService;
@@ -18,6 +19,7 @@ public class MemController {
 
     private final MemService memService;
 
+    @NoAuth
     @GetMapping("/searchUser/{id}")
     public void searchUser(@PathVariable String id) {
         SearchUserReqDto reqDto = new SearchUserReqDto().builder().id(id).build();

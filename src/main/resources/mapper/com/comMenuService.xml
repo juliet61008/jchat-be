@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jchat.com.mapper.ComMenuMapper">
+    <sql id="selectComMenu">
+        id, parent_id
+        , menu_name
+        , menu_url
+        , menu_order
+        , depth
+        , description
+        , use_yn
+    </sql>
+
+    <select id="searchComMenuList" resultType="com.jchat.com.dto.ComMenuListSearchResDto">
+        select
+            <include refid="selectComMenu" />
+        from
+            com_menu
+        where
+            1 = 1
+
+    </select>
+</mapper>

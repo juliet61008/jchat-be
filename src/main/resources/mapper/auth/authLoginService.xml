@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jchat.auth.mapper.AuthLoginMapper">
+    <sql id="selectTboUser">
+        id
+        , name
+        , birth
+    </sql>
+
+    <select id="searchAuthLogin" resultType="com.jchat.auth.dto.UserInfoDto">
+        select /* [autoLoginService.searchAuthLogin] 로그인 인증 조회 [juliet61008/25.12.03]*/
+            <include refid="selectTboUser" />
+        from
+            tbo_user
+        where
+            id = #{id}
+        and password = #{password}
+
+    </select>
+</mapper>

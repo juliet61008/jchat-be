@@ -1,10 +1,74 @@
+# 공통
 spring:
   application:
     name: jchat-be
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration
+  profiles:
+    active: local
 
 server:
   port: 8080
+
+# MyBatis 설정
+mybatis:
+  # MyBatis 설정
+  configuration:
+    # 스네이크 케이스 → 카멜 케이스 자동 변환
+    map-underscore-to-camel-case: true
+    # SQL 로그 출력 레벨 (개발 시 유용, 운영에선 끄는 게 좋음)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # NULL 값 처리
+    call-setters-on-nulls: true
+
+  # Mapper XML 파일 위치 (classpath: = src/main/resources/)
+  mapper-locations: classpath:mapper/**/*.xml
+
+# jwt
+jwt:
+  secret: c57d657c1dc242a3d258025583fb44d7b4b85f6df2f4326100dbb8c2a5d1e82cd27507e9ef204dd724881e965df3c3bbdb6f338afc3db059e122a373a40d3148
+  access-token-validity: 3600000   # 1시간 (밀리초) 3600000 1시간 1800000 30분 60000 1분
+  refresh-token-validity: 604800000  # 7일 (밀리초)
+---
+# 로컬
+spring:
+  config:
+    activate:
+      on-profile: local
+  # 데이터소스 설정 - DB 연결 정보
+  datasource:
+    # JDBC URL - localhost:5432는 PostgreSQL 기본 포트, your_database는 DB명
+    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres
+    # DB 접속 계정
+    username: postgres.tbjsgiazxccudzriczqh
+    # DB 접속 비밀번호
+    password: X12K79uOfcl1esMn
+    # JDBC 드라이버 클래스 (생략 가능, 자동 감지됨)
+    driver-class-name: org.postgresql.Driver
+
+jchat:
+  be:
+    url: http://localhost:8080
+  fe:
+    url: http://localhost:3000
+
+---
+# 운영
+spring:
+  config:
+    activate:
+      on-profile: prod
+  # 데이터소스 설정 - DB 연결 정보
+  datasource:
+    # JDBC URL - localhost:5432는 PostgreSQL 기본 포트, your_database는 DB명
+    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres
+    # DB 접속 계정
+    username: postgres.tbjsgiazxccudzriczqh
+    # DB 접속 비밀번호
+    password: X12K79uOfcl1esMn
+    # JDBC 드라이버 클래스 (생략 가능, 자동 감지됨)
+    driver-class-name: org.postgresql.Driver
+
+jchat:
+  be:
+    url: http://localhost:8080
+  fe:
+    url: http://localhost:3000
