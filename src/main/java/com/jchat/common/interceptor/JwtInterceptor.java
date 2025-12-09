@@ -22,6 +22,10 @@ public class JwtInterceptor implements HandlerInterceptor {
                              HttpServletResponse response,
                              Object handler) throws Exception {
 
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;  // OPTIONS 요청은 무조건 통과
+        }
+
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }

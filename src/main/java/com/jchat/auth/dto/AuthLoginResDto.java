@@ -17,5 +17,5 @@ import lombok.experimental.SuperBuilder;
 public class AuthLoginResDto extends TokenDto {
     @Builder.Default
     private int code = -1;
-    private String id;
+    private UserInfoDto userInfoDto;
 }

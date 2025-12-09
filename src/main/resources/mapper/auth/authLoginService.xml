@@ -4,9 +4,10 @@
 
 <mapper namespace="com.jchat.auth.mapper.AuthLoginMapper">
     <sql id="selectTboUser">
-        id
-        , name
-        , birth
+        id                          as id
+        , name                      as name
+        , birth                     as birth
+        , email_id || email_domain  as email
     </sql>
 
     <select id="searchAuthLogin" resultType="com.jchat.auth.dto.UserInfoDto">
@@ -16,7 +17,17 @@
             tbo_user
         where
             id = #{id}
-        and password = #{password}
+        and secn_yn = 'N'
 
+    </select>
+
+    <select id="searchPasswordById" resultType="com.jchat.auth.dto.PasswordByIdResDto">
+        select /* [autoLoginService.searchPasswordById] 아이디로 비밀번호 조회 [juliet61008/25.12.09]*/
+            password
+        from
+            tbo_user
+        where
+            id = #{id}
+        and secn_yn = 'N'
     </select>
 </mapper>

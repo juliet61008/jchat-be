@@ -34,9 +34,10 @@ public class JwtUtil {
     // Access Token 생성 (사용자 정보 포함)
     public String generateAccessToken(UserInfoDto userInfoDto) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userInfoDto.getId());
+        claims.put("id", userInfoDto.getId());
         claims.put("name", userInfoDto.getName());
         claims.put("birth", userInfoDto.getBirth());
+        claims.put("email", userInfoDto.getEmail());
 
         return generateToken(claims, userInfoDto.getId(), accessTokenValidity);
     }

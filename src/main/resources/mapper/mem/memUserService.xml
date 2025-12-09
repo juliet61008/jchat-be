@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jchat.mem.mapper.MemUserMapper">
+    <insert id="insertUser">
+        /* [memUserService.registUser] 회원정보삽입 [juliet61008/25.12.08]*/
+        insert into tbo_user (
+            id /* 아이디 */
+            , password /* 패스워드 */
+            , name /* 이름 */
+            , birth /* 생년월일 */
+            , email_id /* 이메일아이디 */
+            , email_domain /* 이메일주소 */
+            , regist_tm /* 회원가입일자 */
+            , create_tm /* 생성일자 */
+            , update_tm /* 수정일자 */
+            ) values (
+            #{id}
+            , #{password}
+            , #{name}
+            , #{birth}
+            , #{emailId}
+            , #{emailDomain}
+            , now()
+            , now()
+            , now()
+            )
+    </insert>
+</mapper>
