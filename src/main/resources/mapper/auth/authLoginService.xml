@@ -4,14 +4,15 @@
 
 <mapper namespace="com.jchat.auth.mapper.AuthLoginMapper">
     <sql id="selectTboUser">
-        id                          as id
+        user_no                     as user_no
+        , id                        as id
         , name                      as name
         , birth                     as birth
         , email_id || email_domain  as email
     </sql>
 
     <select id="searchAuthLogin" resultType="com.jchat.auth.dto.UserInfoDto">
-        select /* [autoLoginService.searchAuthLogin] 로그인 인증 조회 [juliet61008/25.12.03]*/
+        select /* [authLoginService.searchAuthLogin] 로그인 인증 조회 [juliet61008/25.12.03]*/
             <include refid="selectTboUser" />
         from
             tbo_user
@@ -22,7 +23,7 @@
     </select>
 
     <select id="searchPasswordById" resultType="com.jchat.auth.dto.PasswordByIdResDto">
-        select /* [autoLoginService.searchPasswordById] 아이디로 비밀번호 조회 [juliet61008/25.12.09]*/
+        select /* [authLoginService.searchPasswordById] 아이디로 비밀번호 조회 [juliet61008/25.12.09]*/
             password
         from
             tbo_user

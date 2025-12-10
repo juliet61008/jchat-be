@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jchat.chat.mapper.ChatMapper">
+
+    <sql id="selectChatRoomMsg">
+        msg_id
+        , room_id
+        , user_no
+        , msg_content
+        , msg_typ_cd
+        , del_yn
+        , create_tm
+    </sql>
+
+    <insert id="insertChatRoom" parameterType="com.jchat.chat.dto.InsertChatRoomReqDto">
+        <selectKey keyProperty="roomId" resultType="long" order="BEFORE">
+            SELECT nextval('seq_chat_room_id')
+        </selectKey>
+
+        insert into /* [chatService.insertChatRoom] 채팅방 베이스 삽입 [juliet61008/25.12.10]*/
+        tbo_chat_room (
+            room_id
+            , room_name
+            , del_yn
+            , room_cd
+            , create_tm
+            , update_tm
+        ) values (
+           #{roomId} /* room_id */
+         , #{roomName} /* room_name */
+         , 'N' /* del_yn */
+         , '01' /* room_cd */
+         , now() /* create_tm */
+         , now() /* update_tm */
+        )
+    </insert>
+
+    <insert id="insertChatRoomUser" parameterType="com.jchat.chat.dto.InsertChatRoomUserReqDto">
+        insert into /* [chatService.insertChatRoomUser] 채팅방 유저 삽입 [juliet61008/25.12.10]*/
+        tbo_chat_room_user (
+             room_id
+           , user_no
+           , join_yn
+           , join_tm
+           , unjoin_tm
+           , create_tm
+           , update_tm
+        ) values (
+              #{roomId} /* room_id */
+            , #{userNo} /* user_no */
+            , 'Y' /* join_yn */
+            , now() /* join_tm */
+            , null /* unjoin_tm */
+            , now() /* create_tm */
+            , now() /* update_tm */
+        )
+    </insert>
+
+    <insert id="insertChatRoomMsg" parameterType="com.jchat.chat.dto.InsertChatRoomMsgReqDto">
+        <selectKey keyProperty="msgId" resultType="long" order="BEFORE">
+            SELECT nextval('seq_chat_room_msg_id')
+        </selectKey>
+
+        insert into /* [chatService.insertChatRoomUser] 채팅방 유저 삽입 [juliet61008/25.12.10]*/
+            tbo_chat_room_msg (
+                msg_id
+                , room_id
+                , user_no
+                , msg_content
+                , msg_typ_cd
+                , del_yn
+                , del_tm
+                , create_tm
+                , update_tm
+        ) values (
+                #{msgId} /* msg_id */
+                , #{roomId} /* room_id */
+                , #{userNo} /* user_no */
+                , #{msgContent} /* msg_content */
+                , '01' /* msg_typ_cd */
+                , 'N' /* del_yn */
+                , null /* del_tm */
+                , now() /* create_tm */
+                , now() /* update_tm */
+            )
+    </insert>
+
+    <select id="searchChatRoomMsgByPk" resultType="com.jchat.chat.dto.ChatDataDto">
+        select /* [chatService.searchChatRoomMsgByPk] 채팅메세지정보 PK로 조회 [juliet61008/25.12.10]*/
+            <include refid="selectChatRoomMsg" />
+        from
+            tbo_chat_room_msg
+        where
+            msg_id = #{msgId}
+    </select>
+
+</mapper>

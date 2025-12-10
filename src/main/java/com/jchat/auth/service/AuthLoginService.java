@@ -38,7 +38,7 @@ public class AuthLoginService {
         }
 
         if (!this.isMatchPassword(reqDto.getPassword(), passwordByIdResDto.getPassword())) {
-            return AuthLoginResDto.builder().code(-2).build();
+            return AuthLoginResDto.builder().code(-3).build();
         }
 
         // 유저정보 조회
