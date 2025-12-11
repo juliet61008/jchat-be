@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jchat.mem.mapper.MemFriendMapper">
+    <select id="searchUserList" resultType="com.jchat.mem.dto.SearchUserListResDto">
+        /* [authLoginService.searchUserList] 로그인 인증 조회 [juliet61008/25.12.03]*/
+        with wt_user_relation_mine as (
+            select b1.user_no
+                    , b1.relation_user_no
+                    , b1.alias_nm
+            from tbo_user_relation
+            where user_no = #{userNo}
+        )
+        select
+                a1.user_no
+                , a1.id
+                , a1.name
+                , b1.alias_nm
+        from
+                tbo_user a1
+        left join
+                wt_user_relation_mine b1
+        on
+                a1.user_no = b1.relation_user_no
+        where
+                a1.secn_yn = 'N' /* 탈퇴여부 */
+            and a1.public_relation_yn = 'Y' /* 공개여부 */
+            and a1.user_no <![CDATA[ <> ]]> #{userNo}
+    </select>
+</mapper>

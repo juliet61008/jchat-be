@@ -1,16 +1,14 @@
 package com.jchat.mem.service;
 
-import com.jchat.common.annotation.NoAuth;
 import com.jchat.common.constants.CommonConstants;
-import com.jchat.mem.dto.RegisterUserReqDto;
-import com.jchat.mem.dto.RegisterUserResDto;
-import com.jchat.mem.dto.SearchUserReqDto;
-import com.jchat.mem.dto.SearchUserResDto;
+import com.jchat.mem.dto.*;
 import com.jchat.mem.mapper.MemUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +22,6 @@ public class MemUserService {
      * @param {{@link SearchUserReqDto}} reqDto
      * @return {{@link SearchUserResDto}} resDto
      */
-    @NoAuth
     public SearchUserResDto searchUser(SearchUserReqDto reqDto) {
 
         SearchUserResDto resDto = new SearchUserResDto();
@@ -36,6 +33,19 @@ public class MemUserService {
             resDto.setId("who");
             resDto.setName("누구");
         }
+
+        return resDto;
+    }
+
+    /**
+     * 회원정보조회
+     * @param {{@link SearchUserReqDto}} reqDto
+     * @return {{@link SearchUserResDto}} resDto
+     */
+    public List<SearchUserListResDto> searchUserList(SearchUserListReqDto reqDto) {
+
+        List<SearchUserListResDto> resDto = memUserMapper.searchUserList(reqDto);
+
 
         return resDto;
     }

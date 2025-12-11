@@ -8,7 +8,7 @@
         , id                        as id
         , name                      as name
         , birth                     as birth
-        , email_id || email_domain  as email
+        , email_id || '@' || email_domain  as email
     </sql>
 
     <select id="searchAuthLogin" resultType="com.jchat.auth.dto.UserInfoDto">

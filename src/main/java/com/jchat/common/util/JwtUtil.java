@@ -121,10 +121,14 @@ public class JwtUtil {
         Cookie accessTokenCookie = new Cookie("accessToken", null);
         accessTokenCookie.setMaxAge(0);
         accessTokenCookie.setPath("/");
+        accessTokenCookie.setHttpOnly(true);  // 추가
+        accessTokenCookie.setSecure(false);   // 추가
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", null);
         refreshTokenCookie.setMaxAge(0);
         refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setHttpOnly(true);  // 추가
+        refreshTokenCookie.setSecure(false);   // 추가
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);

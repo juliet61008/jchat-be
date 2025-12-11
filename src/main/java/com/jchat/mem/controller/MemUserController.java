@@ -1,20 +1,20 @@
 package com.jchat.mem.controller;
 
 import com.jchat.common.annotation.NoAuth;
-import com.jchat.mem.dto.RegisterUserReqDto;
-import com.jchat.mem.dto.RegisterUserResDto;
-import com.jchat.mem.dto.SearchUserReqDto;
-import com.jchat.mem.dto.SearchUserResDto;
+import com.jchat.common.context.UserContext;
+import com.jchat.mem.dto.*;
 import com.jchat.mem.service.MemUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/mem")
+@RequestMapping("/mem/user")
 public class MemUserController {
 
     private final MemUserService memUserService;
@@ -30,6 +30,12 @@ public class MemUserController {
         SearchUserResDto resDto = memUserService.searchUser(reqDto);
         System.out.println("==================");
         log.info("id : {} , name : {}", resDto.getId(), resDto.getName());
+    }
+
+    @GetMapping("/searchUserList")
+    public List<SearchUserListResDto> searchUserList() {
+
+        return memUserService.searchUserList(SearchUserListReqDto.builder().userNo(UserContext.getUserNo()).build());
     }
 
     /**

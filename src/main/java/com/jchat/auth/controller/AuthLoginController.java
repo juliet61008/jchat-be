@@ -5,6 +5,7 @@ import com.jchat.auth.dto.AuthLoginResDto;
 import com.jchat.auth.service.AuthLoginService;
 import com.jchat.common.annotation.NoAuth;
 import com.jchat.common.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
 
 @Slf4j
 @RestController
@@ -46,7 +49,8 @@ public class AuthLoginController {
 
     @NoAuth
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response) {
+    public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
+        System.out.println("현재 쿠키들: " + Arrays.toString(request.getCookies()));
         // 쿠키 삭제
         jwtUtil.deleteTokenCookies(response);
         return ResponseEntity.ok("로그아웃 성공");
