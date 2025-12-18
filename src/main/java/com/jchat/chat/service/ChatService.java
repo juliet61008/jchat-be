@@ -1,10 +1,12 @@
-package com.jchat.chat.controller;
+package com.jchat.chat.service;
 
 import com.jchat.chat.dto.*;
 import com.jchat.chat.mapper.ChatMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class ChatService {
      * @return {{@link SendMsgResDto}0}
      */
     @Transactional
-    public SendMsgResDto sendMsg(Long roomId, SendMsgReqDto sendMsgReqDto) {
+    public ChatRoomMsg sendMsg(Long userNo, Long roomId, SendMsgReqDto sendMsgReqDto) {
 
         // 채팅방번호 null로 오는 경우
         if (roomId == null) {
@@ -30,7 +32,7 @@ public class ChatService {
         // 채팅 메세지 생성
         InsertChatRoomMsgReqDto insertChatRoomMsgReqDto = InsertChatRoomMsgReqDto.builder()
                 .roomId(roomId)
-                .userNo(1L) // 여기 userNo는 토큰에서 가져와야할듯
+                .userNo(userNo) // 여기 userNo는 토큰에서 가져와야할듯
                 .msgContent(sendMsgReqDto.getMsgContent())
                 .build();
 
@@ -40,13 +42,11 @@ public class ChatService {
         // 메세지 시퀀스
         Long msgId = insertChatRoomMsgReqDto.getMsgId();
 
-        ChatDataDto chatDataDto = chatMapper.searchChatRoomMsgByPk(msgId);
+        SearchChatRoomMsgByPkReqDto searchChatRoomMsgByPkReqDto = SearchChatRoomMsgByPkReqDto.builder().msgId(msgId).roomId(roomId).userNo(userNo).build();
 
-        return SendMsgResDto.builder()
-                .roomId(roomId)
-                .msgId(msgId)
-                .chatDataDto(chatDataDto)
-                .build();
+        ChatRoomMsg chatRoomMsg = chatMapper.searchChatRoomMsgByPk(searchChatRoomMsgByPkReqDto);
+
+        return chatRoomMsg;
     }
 
     /**
@@ -72,5 +72,24 @@ public class ChatService {
             // 채팅방 유저 삽입 요청
             chatMapper.insertChatRoomUser(insertChatRoomUserReqDto);
         }
+    }
+
+    /**
+     * 채팅방정보 조회
+     * @param reqDto
+     * @return
+     */
+    public SearchChatRoomResDto searchChatRoom(SearchChatRoomReqDto reqDto) {
+
+        // 유저리스트 조회
+        List<ChatRoomUser> chatRoomUser = chatMapper.searchChatRoomUser(reqDto);
+        // 채팅방메세지리스트 조회
+        List<ChatRoomMsg> chatRoomMsg = chatMapper.searchChatRoomMsg(reqDto);
+
+        return SearchChatRoomResDto.builder()
+                .roomId(reqDto.getRoomId())
+                .chatRoomUserList(chatRoomUser)
+                .chatRoomMsgList(chatRoomMsg)
+                .build();
     }
 }

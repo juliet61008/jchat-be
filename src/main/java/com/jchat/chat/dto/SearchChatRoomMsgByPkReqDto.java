@@ -6,22 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 채팅 전송 ws RES DTO
+ * 채팅방 조회 REQ DTO
  */
 
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
-public class SendMsgResDto {
-
-    // 임시번호
-    private String tempId;
-
+public class SearchChatRoomMsgByPkReqDto {
     // 채팅방번호
     private Long roomId;
 
-    // 채팅방 메세지 내용
-    private ChatRoomMsg chatRoomMsg;
+    // 메세지아이디
+    private Long msgId;
+
+    // 회원번호
+    private Long userNo;
 
 }

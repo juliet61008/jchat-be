@@ -2,8 +2,10 @@ package com.jchat.auth.controller;
 
 import com.jchat.auth.dto.AuthLoginReqDto;
 import com.jchat.auth.dto.AuthLoginResDto;
+import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.auth.service.AuthLoginService;
 import com.jchat.common.annotation.NoAuth;
+import com.jchat.common.util.CookieUtil;
 import com.jchat.common.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -56,4 +59,42 @@ public class AuthLoginController {
         return ResponseEntity.ok("로그아웃 성공");
     }
 
+    @NoAuth
+    @PostMapping("/refreshToken")
+    public ResponseEntity<?> refresh(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        // 1. refreshToken 추출
+        String refreshToken = CookieUtil.extractTokenFromCookie(request, "refreshToken");
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("code", 401, "message", "No refresh token"));
+        }
+
+        // 2. refreshToken 검증
+        if (!jwtUtil.validateToken(refreshToken)) {
+            // refreshToken도 만료 → 재로그인 필요
+            return ResponseEntity.status(401)
+                    .body(Map.of("code", 401, "message", "Refresh token expired"));
+        }
+
+        // 3. 사용자 정보 추출
+        UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(refreshToken);
+
+        // 4. 새 accessToken 발급
+        String newAccessToken = jwtUtil.generateAccessToken(userInfo);
+        jwtUtil.addAccessTokenCookie(response, newAccessToken);
+
+        // 5. refreshToken도 갱신 (Refresh Token Rotation)
+        // Refresh Token 생성 (userId만)
+        String newRefreshToken = jwtUtil.generateRefreshToken(userInfo.getUserNo());
+        jwtUtil.addRefreshTokenCookie(response, newRefreshToken);
+
+        return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "message", "Token refreshed"
+        ));
+    }
 }

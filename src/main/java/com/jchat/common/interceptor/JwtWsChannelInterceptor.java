@@ -39,7 +39,7 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
      * 인증 없이 접근 가능한 Public 경로 프리픽스
      * /app/public/** 형태의 모든 경로는 인증 생략
      */
-    private static final String PUBLIC_PATH_PREFIX = "/app/public/";
+//    private static final String PUBLIC_PATH_PREFIX = "/app/public/";
 
     /**
      * 메시지 전송 전 전처리
@@ -74,18 +74,23 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
     }
 
     /**
-     * 메시지 전송 후 후처리
-     * - UserContext 정리 (ThreadLocal 메모리 누수 방지)
-     *
-     * @param message STOMP 메시지
-     * @param channel 메시지 채널
-     * @param sent 전송 성공 여부
+     * MessageMapping 실행 후 처리
+     * @param message
+     * @param channel
+     * @param sent
+     * @param ex
      */
     @Override
-    public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-        // 메시지 처리 완료 후 반드시 UserContext 정리
-        // ThreadLocal 특성상 스레드 재사용 시 이전 데이터가 남을 수 있음
-        UserContext.clear();
+    public void afterSendCompletion(
+            Message<?> message,
+            MessageChannel channel,
+            boolean sent,
+            Exception ex
+    ) {
+
+
+        // @MessageMapping 완전히 끝난 후
+//        UserContext.clear(); // 여기서 clear 해야 함!
     }
 
     /**
@@ -100,8 +105,8 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
         Boolean authenticated = (Boolean) sessionAttributes.get("authenticated");
 
         if (Boolean.TRUE.equals(authenticated)) {
-            Long userId = (Long) sessionAttributes.get("userId");
-            log.info("WebSocket CONNECT - 인증된 사용자 (userId: {})", userId);
+            String id = (String) sessionAttributes.get("id");
+            log.info("WebSocket CONNECT - 인증된 사용자 (userId: {})", id);
         } else {
             log.info("WebSocket CONNECT - 익명 사용자");
         }
@@ -118,28 +123,25 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
         String destination = accessor.getDestination();
 
         // 1. Public 경로는 인증 생략 (익명 사용자 접근 가능)
-        if (destination != null && isPublicPath(destination)) {
-            log.debug("Public 경로 - 인증 생략: {}", destination);
-            return;
-        }
+//        if (destination != null && isPublicPath(destination)) {
+//            log.debug("Public 경로 - 인증 생략: {}", destination);
+//            return;
+//        }
 
-        // 2. Private 경로는 인증 필수
         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
         Boolean authenticated = (Boolean) sessionAttributes.get("authenticated");
 
-        // 인증되지 않은 사용자가 Private 경로 접근 시도
-        if (!Boolean.TRUE.equals(authenticated)) {
-            log.warn("인증되지 않은 사용자의 Private 경로 접근 시도 - destination: {}", destination);
-            throw new IllegalArgumentException("Unauthorized - Authentication required for this endpoint");
+        // 인증된 사용자는 usercontext 추가
+        if (Boolean.TRUE.equals(authenticated)) {
+            // 3. UserContext에 사용자 정보 설정
+            // @MessageMapping, Service 등에서 UserContext.getUserId() 사용 가능
+            UserInfoDto userInfo = (UserInfoDto) sessionAttributes.get("userInfo");
+            UserContext.setUserInfo(userInfo);
+            log.info("인증 완료 - userId: {}, destination: {}",
+                    userInfo.getId(), destination);
         }
 
-        // 3. UserContext에 사용자 정보 설정
-        // @MessageMapping, Service 등에서 UserContext.getUserId() 사용 가능
-        UserInfoDto userInfo = (UserInfoDto) sessionAttributes.get("userInfo");
-        UserContext.setUserInfo(userInfo);
 
-        log.debug("인증 완료 - userId: {}, destination: {}",
-                userInfo.getId(), destination);
     }
 
     /**
@@ -152,13 +154,13 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
     private void handleDisconnect(StompHeaderAccessor accessor) {
         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
         Boolean authenticated = (Boolean) sessionAttributes.get("authenticated");
-        Long userId = sessionAttributes != null ? (Long) sessionAttributes.get("userId") : null;
+        String id = sessionAttributes != null ? (String) sessionAttributes.get("id") : null;
 
         // UserContext 정리
         UserContext.clear();
 
         if (Boolean.TRUE.equals(authenticated)) {
-            log.info("WebSocket DISCONNECT - 인증된 사용자 (userId: {})", userId);
+            log.info("WebSocket DISCONNECT - 인증된 사용자 (userId: {})", id);
         } else {
             log.info("WebSocket DISCONNECT - 익명 사용자");
         }
@@ -171,7 +173,7 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
      * @param destination 목적지 경로 (예: /app/public/announce)
      * @return true: Public 경로, false: Private 경로
      */
-    private boolean isPublicPath(String destination) {
-        return destination.startsWith(PUBLIC_PATH_PREFIX);
-    }
+//    private boolean isPublicPath(String destination) {
+//        return destination.startsWith(PUBLIC_PATH_PREFIX);
+//    }
 }

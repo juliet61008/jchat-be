@@ -1,15 +1,16 @@
 package com.jchat.chat.mapper;
 
-import com.jchat.chat.dto.ChatDataDto;
-import com.jchat.chat.dto.InsertChatRoomMsgReqDto;
-import com.jchat.chat.dto.InsertChatRoomReqDto;
-import com.jchat.chat.dto.InsertChatRoomUserReqDto;
+import com.jchat.chat.dto.*;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 @Mapper
 public interface ChatMapper {
     void insertChatRoom(InsertChatRoomReqDto insertChatRoomReqDto );
     void insertChatRoomUser(InsertChatRoomUserReqDto insertChatRoomUserReqDto);
     void insertChatRoomMsg(InsertChatRoomMsgReqDto insertChatRoomMsgReqDto);
-    ChatDataDto searchChatRoomMsgByPk (Long msgId);
+    ChatRoomMsg searchChatRoomMsgByPk (SearchChatRoomMsgByPkReqDto searchChatRoomMsgByPkReqDto);
+    List<ChatRoomUser> searchChatRoomUser(SearchChatRoomReqDto searchChatRoomReqDto);
+    List<ChatRoomMsg> searchChatRoomMsg(SearchChatRoomReqDto searchChatRoomReqDto);
 }

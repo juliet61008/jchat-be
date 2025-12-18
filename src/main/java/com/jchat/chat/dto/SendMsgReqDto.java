@@ -12,6 +12,8 @@ import java.util.List;
 @Data
 public class SendMsgReqDto {
 
+    // 임시 번호
+    private String tempId;
     // 채팅방 번호
     private Long roomId;
     // 채팅방 이름

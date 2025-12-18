@@ -34,27 +34,28 @@ public class JwtUtil {
     // Access Token 생성 (사용자 정보 포함)
     public String generateAccessToken(UserInfoDto userInfoDto) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userNo", userInfoDto.getUserNo());
         claims.put("id", userInfoDto.getId());
         claims.put("name", userInfoDto.getName());
         claims.put("birth", userInfoDto.getBirth());
         claims.put("email", userInfoDto.getEmail());
 
-        return generateToken(claims, userInfoDto.getId(), accessTokenValidity);
+        return generateToken(claims, userInfoDto.getUserNo(), accessTokenValidity);
     }
 
     // Refresh Token 생성 (userId만)
-    public String generateRefreshToken(String id) {
-        return generateToken(new HashMap<>(), id, refreshTokenValidity);
+    public String generateRefreshToken(Long userNo) {
+        return generateToken(new HashMap<>(), userNo, refreshTokenValidity);
     }
 
     // 토큰 생성 (공통)
-    private String generateToken(Map<String, Object> claims, String subject, long validity) {
+    private String generateToken(Map<String, Object> claims, Long subject, long validity) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + validity);
 
         return Jwts.builder()
-                .claims(claims)           // 커스텀 정보
-                .subject(subject)         // id
+                .claims(claims) // 커스텀 정보
+                .subject(String.valueOf(subject)) // userNo
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey, Jwts.SIG.HS256)
@@ -71,9 +72,11 @@ public class JwtUtil {
     public UserInfoDto getUserInfoFromToken(String token) {
         Claims claims = parseClaims(token);
         return UserInfoDto.builder()
-                .id(claims.getSubject())
+                .userNo(Long.parseLong(claims.getSubject()))
+                .id(claims.get("id", String.class))
                 .name(claims.get("name", String.class))
-                .birth(claims.get("nickname", Integer.class))
+                .birth(claims.get("birth", Integer.class))
+                .email(claims.get("email", String.class))
                 .build();
     }
 

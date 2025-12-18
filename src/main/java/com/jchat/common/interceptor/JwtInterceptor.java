@@ -3,8 +3,8 @@ package com.jchat.common.interceptor;
 import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.common.annotation.NoAuth;
 import com.jchat.common.context.UserContext;
+import com.jchat.common.util.CookieUtil;
 import com.jchat.common.util.JwtUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -41,25 +41,28 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         // 쿠키에서 accessToken 추출
-        String token = extractTokenFromCookie(request, "accessToken");
+        String accessToken = CookieUtil.extractTokenFromCookie(request, "accessToken");
 
-        if (token == null || !jwtUtil.validateToken(token)) {
+        // accessToken 없거나 검증 걸림
+        if (accessToken == null || !jwtUtil.validateToken(accessToken)) {
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write("{\"code\":401,\"message\":\"Unauthorized\"}");
             return false;
+
         }
 
         // 토큰에서 사용자 정보 추출해서 request에 저장
-        UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(token);
+        UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(accessToken);
 
         // UserContext 셋
         UserContext.setUserInfo(userInfo);
 
         request.setAttribute("userInfo", userInfo);
-        request.setAttribute("userNo", userInfo.getUserNo());
         request.setAttribute("id", userInfo.getId());
+        request.setAttribute("userNo", userInfo.getUserNo());
         request.setAttribute("name", userInfo.getName());
         request.setAttribute("birth", userInfo.getBirth());
 
@@ -77,17 +80,5 @@ public class JwtInterceptor implements HandlerInterceptor {
         if (ex != null) {
             log.error("Request processing error", ex);
         }
-    }
-
-    private String extractTokenFromCookie(HttpServletRequest request, String cookieName) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
     }
 }

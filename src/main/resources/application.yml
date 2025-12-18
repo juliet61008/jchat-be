@@ -18,6 +18,8 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     # NULL 값 처리
     call-setters-on-nulls: true
+#    default-executor-type: SIMPLE # REUSE 대신 SIMPLE
+#    local-cache-scope: STATEMENT # 캐시 범위 축소
 
   # Mapper XML 파일 위치 (classpath: = src/main/resources/)
   mapper-locations: classpath:mapper/**/*.xml
@@ -36,11 +38,16 @@ spring:
   # 데이터소스 설정 - DB 연결 정보
   datasource:
     # JDBC URL - localhost:5432는 PostgreSQL 기본 포트, your_database는 DB명
-    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres
+    url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres?prepareThreshold=0&preparedStatementCacheQueries=0
+    hikari:
+      maximum-pool-size: 10  # Supabase Pooler 사용 시 10 이하 권장
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
     # DB 접속 계정
     username: postgres.tbjsgiazxccudzriczqh
     # DB 접속 비밀번호
-    password: X12K79uOfcl1esMn
+    password: jchat!1q@2w#3e
     # JDBC 드라이버 클래스 (생략 가능, 자동 감지됨)
     driver-class-name: org.postgresql.Driver
 

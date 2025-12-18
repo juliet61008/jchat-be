@@ -87,13 +87,105 @@
             )
     </insert>
 
-    <select id="searchChatRoomMsgByPk" resultType="com.jchat.chat.dto.ChatDataDto">
-        select /* [chatService.searchChatRoomMsgByPk] 채팅메세지정보 PK로 조회 [juliet61008/25.12.10]*/
-            <include refid="selectChatRoomMsg" />
+    <select id="searchChatRoomMsgByPk" resultType="com.jchat.chat.dto.ChatRoomMsg">
+        /* [chatService.searchChatRoomMsgByPk] 채팅메세지정보 PK로 조회 [juliet61008/25.12.10]*/
+        select
+            a1.room_id
+             , b1.msg_id
+             , c1.user_no as snd_user_no /* 발신자 회원번호 */
+             , c1.name snd_name /* 발신자 성함 */
+             , b1.msg_typ_cd
+             , case
+                   when b1.del_yn = 'Y'
+                       then '삭제된 메세지 입니다.'
+                   else b1.msg_content
+            end as msg_content
+             , case
+                   when c1.user_no = #{userNo}
+                       then 'Y'
+                   else 'N'
+            end as mine_yn
+             , b1.del_yn
+             , b1.create_tm
         from
-            tbo_chat_room_msg
+            tbo_chat_room a1
+                left join
+            tbo_chat_room_msg b1
+            on a1.room_id = b1.room_id
+                left join tbo_user c1
+                          on b1.user_no = c1.user_no
         where
-            msg_id = #{msgId}
+              b1.msg_id = #{msgId}
+          and a1.room_id = #{roomId}
+          and a1.del_yn = 'N'
+        order by
+            b1.msg_id
+    </select>
+
+    <select id="searchChatRoomUser" resultType="com.jchat.chat.dto.ChatRoomUser">
+        /* [chatService.searchChatRoomUser] 채팅방 참여자 목록 조회 [juliet61008/25.12.15]*/
+        with wt_user_relation_mine as (
+            select *
+            from tbo_user_relation
+            where user_no = #{userNo}
+        )
+        select
+            c1.user_no
+            , c1.name
+            , case
+                   when d1.user_no is not null
+                       then 'Y'
+                   else 'N'
+            end as friend_yn
+            , case
+                   when c1.user_no = #{userNo}
+                       then 'Y'
+                   else 'N'
+            end as mine_yn
+        from tbo_chat_room a1
+                 left join tbo_chat_room_user b1
+                           on a1.room_id = b1.room_id
+                 left join tbo_user c1
+                           on b1.user_no = c1.user_no
+                 left join wt_user_relation_mine d1
+                           on c1.user_no = d1.relation_user_no
+        where a1.room_id = #{roomId}
+          and a1.del_yn = 'N'
+          and b1.join_yn = 'Y'
+    </select>
+
+    <select id="searchChatRoomMsg" resultType="com.jchat.chat.dto.ChatRoomMsg">
+        /* [chatService.searchChatRoomMsg] 채팅방 메세지 정보 조회 [juliet61008/25.12.15]*/
+        select
+                a1.room_id
+                , b1.msg_id
+                , c1.user_no as snd_user_no /* 발신자 회원번호 */
+                , c1.name snd_name /* 발신자 성함 */
+                , b1.msg_typ_cd
+                , case
+                    when b1.del_yn = 'Y'
+                    then '삭제된 메세지 입니다.'
+                    else b1.msg_content
+                end as msg_content
+                , case
+                      when c1.user_no = #{userNo}
+                          then 'Y'
+                      else 'N'
+                end as mine_yn
+                , b1.del_yn
+                , b1.create_tm
+        from
+                tbo_chat_room a1
+        left join
+                tbo_chat_room_msg b1
+            on a1.room_id = b1.room_id
+        left join tbo_user c1
+            on b1.user_no = c1.user_no
+        where
+                a1.room_id = #{roomId}
+            and a1.del_yn = 'N'
+        order by
+                b1.msg_id
     </select>
 
 </mapper>

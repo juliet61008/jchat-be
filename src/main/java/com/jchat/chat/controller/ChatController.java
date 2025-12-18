@@ -1,42 +1,43 @@
 package com.jchat.chat.controller;
 
-import com.jchat.chat.dto.SendMsgReqDto;
+import com.jchat.chat.dto.SearchChatRoomReqDto;
+import com.jchat.chat.dto.SearchChatRoomResDto;
+import com.jchat.chat.service.ChatService;
+import com.jchat.common.context.UserContext;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.stereotype.Controller;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@Slf4j
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/chat")
 public class ChatController {
-
     private final ChatService chatService;
 
     /**
-     * 테스트 컨트롤러
-     * @param message
-     * @return
+     * 채팅방 정보 조회
+     * @param {{@link SearchChatRoomReqDto}} reqDto
+     * @return {{@link SearchChatRoomResDto}}
      */
-    @MessageMapping("/hello")
-    @SendTo("/topic/wsTest")
-    public String wsTest(String message) {
-        System.out.println("받은거: " + message);
-        return "응답할거: " + message + " 이거 보낸거 맞지?";
+    @GetMapping("/searchChatRoom/{roomId}")
+    public SearchChatRoomResDto searchChatRoom(@PathVariable Long roomId) {
+
+        Long userNo = UserContext.getUserNo();
+
+        System.out.println("roomId: " + roomId);
+
+        System.out.println("userNo = " + userNo);
+
+        SearchChatRoomReqDto reqDto = SearchChatRoomReqDto.builder()
+                                                            .roomId(roomId)
+                                                            .userNo(userNo)
+                                                            .build();
+
+        return chatService.searchChatRoom(reqDto);
     }
 
-    /**
-     * 메세지 발송
-     * @param roomId
-     * @param reqDto
-     */
-    @MessageMapping("/chat/send/{roomId}")
-    @SendTo("/topic/chat/send/{roomId}")
-    public void sendMsg(
-            @DestinationVariable Long roomId,
-            @Payload SendMsgReqDto reqDto
-    ) {
-        chatService.sendMsg(roomId, reqDto);
-    }
 }

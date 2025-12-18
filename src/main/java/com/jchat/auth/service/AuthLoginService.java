@@ -50,7 +50,7 @@ public class AuthLoginService {
         }
 
         String accessToken = jwtUtil.generateAccessToken(userInfoDto);
-        String refreshToken = jwtUtil.generateRefreshToken(userInfoDto.getId());
+        String refreshToken = jwtUtil.generateRefreshToken(userInfoDto.getUserNo());
 
         return AuthLoginResDto.builder()
                 .code(0)
