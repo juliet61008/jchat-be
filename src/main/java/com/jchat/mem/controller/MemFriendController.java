@@ -1,10 +1,7 @@
 package com.jchat.mem.controller;
 
 import com.jchat.common.context.UserContext;
-import com.jchat.mem.dto.InsertFriendReqDto;
-import com.jchat.mem.dto.InsertFriendResDto;
-import com.jchat.mem.dto.UpdateFriendReqDto;
-import com.jchat.mem.dto.UpdateFriendResDto;
+import com.jchat.mem.dto.*;
 import com.jchat.mem.service.MemFriendService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +19,17 @@ public class MemFriendController {
 
     private final MemFriendService memFriendService;
 
+    /**
+     * 친구목록 조회
+     * @return
+     */
     @GetMapping("/list")
     public ResponseEntity<?> searchFriendList() {
 
         if (!UserContext.hasUser()) {
             return ResponseEntity.status(401)
-                .body(Map.of("code", 401, "message", "No access token"));}
+                .body(Map.of("code", 401, "message", "No access token"));
+        }
 
         return ResponseEntity.ok(memFriendService.searchFriendList(UserContext.getUserNo()));
     }
@@ -37,15 +39,17 @@ public class MemFriendController {
      * @param reqDto
      * @return
      */
-    @PostMapping("/insertFriend")
-    public ResponseEntity<?> insertFriend(@Valid InsertFriendReqDto reqDto) {
+    @PostMapping("/insert")
+    public ResponseEntity<?> insertFriend(@Valid MergeFriendReqDto reqDto) {
 
         try {
-            InsertFriendResDto resDto = memFriendService.insertFriend(reqDto);
+            reqDto.setUserNo(UserContext.getUserNo());
+
+            MergeFriendResDto resDto = memFriendService.mergeFriend(reqDto);
 
             return ResponseEntity.ok(resDto);
         } catch (Exception e) {
-            return ResponseEntity.ok(InsertFriendResDto.builder()
+            return ResponseEntity.ok(MergeFriendResDto.builder()
                     .succYn("N")
                     .userNo(reqDto.getUserNo())
                     .relationUserNo(reqDto.getRelationUserNo())
@@ -59,7 +63,7 @@ public class MemFriendController {
      * @param reqDto
      * @return
      */
-    @PostMapping("/updateFriend")
+    @PostMapping("/update")
     public ResponseEntity<?> updateFriend(@Valid UpdateFriendReqDto reqDto) {
 
         try {

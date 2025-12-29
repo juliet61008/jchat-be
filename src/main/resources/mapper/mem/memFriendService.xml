@@ -12,15 +12,18 @@
              , c1.birth
              , b1.like_yn
              , b1.block_yn
+             , 'Y' as friend_yn
         from
             tbo_user a1
-                left join tbo_user_relation b1
-                          on
-                              a1.user_no = b1.user_no
-                inner join tbo_user c1
-                           on
-                               b1.relation_user_no = c1.user_no
-                                   and c1.secn_yn = 'N'
+        left join
+            tbo_user_relation b1
+        on
+            a1.user_no = b1.user_no
+        inner join
+            tbo_user c1
+        on
+            b1.relation_user_no = c1.user_no
+        and c1.secn_yn = 'N'
     </sql>
 
     <select id="searchFriendList" resultType="com.jchat.mem.dto.ComOtherUser">
@@ -32,13 +35,13 @@
             case
                 when b1.like_yn = 'Y' then 0
                 else 1
-                end asc
+            end asc
                 ,
             case
                 when c1.name ~ '^[가-힣]' then 1
                 when c1.name ~ '^[A-Za-z]' then 2
                 else 3
-                end asc,
+            end asc,
             LOWER(c1.name) asc
     </select>
 
@@ -82,6 +85,27 @@
         where
                 user_no = #{userNo}
             and relation = #{relationUserNo}
+    </update>
+
+    <update id="mergeUserRelation" parameterType="com.jchat.mem.dto.MergeFriendReqDto">
+        merge into tbo_relation as t
+        using (select
+                    #{userNo} as user_no
+                    , #{relationUserNo} as relation_user_no)
+            on t.user_no = s.user_no
+            and t.relation_user_no = s.relation_user_no
+        when matched then
+        update set
+            update_tm = now()
+            <if test='null != likeYn and !"".equals(likeYn)'>
+                , like_yn = #{likeYn}
+            </if>
+            <if test='null != blockYn and !"".equals(blockYn)'>
+                , block_yn = #{blockYn}
+            </if>
+            <if test='null != aliasNm and !"".equals(aliasNm)'>
+                , alias_nm = #{aliasNm}
+            </if>
     </update>
 
 </mapper>

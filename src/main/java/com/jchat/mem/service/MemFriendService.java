@@ -42,19 +42,19 @@ public class MemFriendService {
 
     /**
      * 친구추가
-     * @param {{@link InsertFriendReqDto}} reqDto
+     * @param {{@link MergeFriendReqDto}} reqDto
      * @return {{@link InsertFriendResDto}}
      */
     @Transactional
-    public InsertFriendResDto insertFriend(InsertFriendReqDto reqDto) throws Exception {
+    public MergeFriendResDto mergeFriend(MergeFriendReqDto reqDto) {
 
-        int rst = memFriendMapper.insertFriend(reqDto);
+        int rst = memFriendMapper.mergeFriend(reqDto);
 
         if (rst != 0) {
             throw new IllegalArgumentException("실패 트랜잭션 롤백 실행");
         }
 
-        return InsertFriendResDto.builder()
+        return MergeFriendResDto.builder()
                 .succYn("Y")
                 .userNo(reqDto.getUserNo())
                 .relationUserNo(reqDto.getRelationUserNo())

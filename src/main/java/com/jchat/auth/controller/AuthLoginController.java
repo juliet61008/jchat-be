@@ -30,6 +30,12 @@ public class AuthLoginController {
     private final AuthLoginService authLoginService;
     private final JwtUtil jwtUtil;
 
+    /**
+     * 로그인
+     * @param authLoginReqDto
+     * @param response
+     * @return
+     */
     @NoAuth
     @PostMapping("/login")
     public ResponseEntity<AuthLoginResDto> AuthLogin(@RequestBody @Valid AuthLoginReqDto authLoginReqDto, HttpServletResponse response) {
