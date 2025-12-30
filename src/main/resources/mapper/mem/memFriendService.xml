@@ -45,53 +45,12 @@
             LOWER(c1.name) asc
     </select>
 
-    <insert id="insertFriend" parameterType="com.jchat.mem.dto.InsertFriendReqDto">
-        /* [memFriendService.insertFriend] 친구 추가 [juliet61008/25.12.22]*/
-        insert into tbo_user_relation
-        (
-            user_no
-            , relation_user_no
-            , like_yn
-            , block_yn
-            , create_tm
-            , update_tm
-            , alias_nm
-        ) values (
-            #{userNo}
-            , #{relationUserNo}
-            , coalesce(nullif(trim(#{likeYn}), ''), 'N')
-            , coalesce(nullif(trim(#{blockYn}), ''), 'N')
-            , now()
-            , now()
-            , null
-        )
-    </insert>
-
-    <update id="updateFriend" parameterType="com.jchat.mem.dto.UpdateFriendReqDto">
-        /* [memFriendService.updateFriend] 친구 상태 업데이트 [juliet61008/25.12.22]*/
-        update
-                tbo_user_relation
-        set
-                update_tm = now()
-                <if test='null != likeYn and !"".equals(likeYn)'>
-                    , like_yn = #{likeYn}
-                </if>
-                <if test='null != blockYn and !"".equals(blockYn)'>
-                    , block_yn = #{blockYn}
-                </if>
-                <if test='null != aliasNm and !"".equals(aliasNm)'>
-                    , alias_nm = #{aliasNm}
-                </if>
-        where
-                user_no = #{userNo}
-            and relation = #{relationUserNo}
-    </update>
-
-    <update id="mergeUserRelation" parameterType="com.jchat.mem.dto.MergeFriendReqDto">
-        merge into tbo_relation as t
+    <update id="mergeFriend" parameterType="com.jchat.mem.dto.MergeFriendReqDto">
+        /* [memFriendService.mergeFriend] 친구상태변경 [juliet61008/25.12.30]*/
+        merge into tbo_user_relation as t
         using (select
                     #{userNo} as user_no
-                    , #{relationUserNo} as relation_user_no)
+                    , #{relationUserNo} as relation_user_no) as s
             on t.user_no = s.user_no
             and t.relation_user_no = s.relation_user_no
         when matched then

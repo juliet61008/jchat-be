@@ -4,6 +4,11 @@ spring:
     name: jchat-be
   profiles:
     active: local
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
 
 server:
   port: 8080
@@ -20,7 +25,6 @@ mybatis:
     call-setters-on-nulls: true
 #    default-executor-type: SIMPLE # REUSE 대신 SIMPLE
 #    local-cache-scope: STATEMENT # 캐시 범위 축소
-
   # Mapper XML 파일 위치 (classpath: = src/main/resources/)
   mapper-locations: classpath:mapper/**/*.xml
 

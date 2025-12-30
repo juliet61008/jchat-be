@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MergeFriendReqDto {
     private Long userNo; // 유저번호
-    @NotBlank
     private Long relationUserNo; // 유저관계번호
     private String likeYn; // 즐겨찾기여부
     private String blockYn; // 차단여부

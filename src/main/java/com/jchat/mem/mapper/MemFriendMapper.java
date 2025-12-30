@@ -9,7 +9,5 @@ import java.util.Map;
 @Mapper
 public interface MemFriendMapper {
     List<ComOtherUser> searchFriendList(Long userNo);
-    int insertFriend(InsertFriendReqDto insertFriendReqDto);
-    int updateFriend(UpdateFriendReqDto updateFriendReqDto);
     int mergeFriend(MergeFriendReqDto mergeFriendReqDto);
 }

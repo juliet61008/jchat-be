@@ -35,12 +35,12 @@ public class MemFriendController {
     }
 
     /**
-     * 친구추가
-     * @param reqDto
+     * 친구상태변경
+     * @param {{@link MergeFriendReqDto}} reqDto
      * @return
      */
-    @PostMapping("/insert")
-    public ResponseEntity<?> insertFriend(@Valid MergeFriendReqDto reqDto) {
+    @PostMapping("/merge")
+    public ResponseEntity<MergeFriendResDto> mergeFriend(@Valid @RequestBody MergeFriendReqDto reqDto) {
 
         try {
             reqDto.setUserNo(UserContext.getUserNo());
@@ -57,27 +57,4 @@ public class MemFriendController {
         }
 
     }
-
-    /**
-     * 친구상태변경
-     * @param reqDto
-     * @return
-     */
-    @PostMapping("/update")
-    public ResponseEntity<?> updateFriend(@Valid UpdateFriendReqDto reqDto) {
-
-        try {
-            UpdateFriendResDto resDto = memFriendService.updateFriend(reqDto);
-
-            return ResponseEntity.ok(resDto);
-        } catch (Exception e) {
-            return ResponseEntity.ok(UpdateFriendResDto.builder()
-                    .succYn("N")
-                    .userNo(reqDto.getUserNo())
-                    .relationUserNo(reqDto.getRelationUserNo())
-                    .build());
-        }
-
-    }
-
 }
