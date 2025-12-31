@@ -19,6 +19,9 @@ public class SearchChatRoomResDto {
     // 채팅방번호
     private Long roomId;
 
+    // 채팅방 기본 정보
+    private ChatRoom chatRoom;
+
     // 채팅방 유저 리스트
     private List<ChatRoomUser> chatRoomUserList;
 

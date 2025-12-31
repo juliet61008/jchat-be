@@ -1,11 +1,14 @@
 package com.jchat.chat.service;
 
+import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.chat.dto.*;
 import com.jchat.chat.mapper.ChatMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,22 +20,19 @@ public class ChatService {
     /**
      * 메세지 발송
      * @param {{@link Long}} roomId 채팅방번호
+     * @param {{@link Long}} chatRoomMsgSeq 채팅메세지번호
      * @param {{@link SendMsgReqDto}} sendMsgReqDto
      * @return {{@link SendMsgResDto}0}
      */
     @Transactional
-    public ChatRoomMsg sendMsg(Long userNo, Long roomId, SendMsgReqDto sendMsgReqDto) {
-
-        // 채팅방번호 null로 오는 경우
-        if (roomId == null) {
-            // 첫요청으로 판단 ::: 채팅방 생성
-            generateRoom(roomId, sendMsgReqDto);
-        }
+    @Async("chatTaskExecutor")
+    public void sendMsg(Long userNo, Long roomId, Long chatRoomMsgSeq, SendMsgReqDto sendMsgReqDto) {
 
         // 채팅 메세지 생성
         InsertChatRoomMsgReqDto insertChatRoomMsgReqDto = InsertChatRoomMsgReqDto.builder()
                 .roomId(roomId)
-                .userNo(userNo) // 여기 userNo는 토큰에서 가져와야할듯
+                .msgId(chatRoomMsgSeq)
+                .userNo(userNo)
                 .msgContent(sendMsgReqDto.getMsgContent())
                 .build();
 
@@ -40,13 +40,13 @@ public class ChatService {
         chatMapper.insertChatRoomMsg(insertChatRoomMsgReqDto);
 
         // 메세지 시퀀스
-        Long msgId = insertChatRoomMsgReqDto.getMsgId();
+//        Long msgId = insertChatRoomMsgReqDto.getMsgId();
 
-        SearchChatRoomMsgByPkReqDto searchChatRoomMsgByPkReqDto = SearchChatRoomMsgByPkReqDto.builder().msgId(msgId).roomId(roomId).userNo(userNo).build();
-
-        ChatRoomMsg chatRoomMsg = chatMapper.searchChatRoomMsgByPk(searchChatRoomMsgByPkReqDto);
-
-        return chatRoomMsg;
+//        SearchChatRoomMsgByPkReqDto searchChatRoomMsgByPkReqDto = SearchChatRoomMsgByPkReqDto.builder().msgId(msgId).roomId(roomId).userNo(userNo).build();
+//
+//        ChatRoomMsg chatRoomMsg = chatMapper.searchChatRoomMsgByPk(searchChatRoomMsgByPkReqDto);
+//
+//        return chatRoomMsg;
     }
 
     /**
@@ -62,6 +62,7 @@ public class ChatService {
         chatMapper.insertChatRoom(insertChatRoomReqDto);
 
         roomId = insertChatRoomReqDto.getRoomId();
+        sendMsgReqDto.setRoomId(roomId);
 
         // 채팅방 유저 생성
         for (SendMsgReqDto.InviteUserListDto inviteUser : sendMsgReqDto.getInviteUserList()) {
@@ -81,6 +82,8 @@ public class ChatService {
      */
     public SearchChatRoomResDto searchChatRoom(SearchChatRoomReqDto reqDto) {
 
+        // 채팅방 기본 정보 조회
+        ChatRoom chatRoom = chatMapper.searchChatRoomBasInfo(reqDto);
         // 유저리스트 조회
         List<ChatRoomUser> chatRoomUser = chatMapper.searchChatRoomUser(reqDto);
         // 채팅방메세지리스트 조회
@@ -88,8 +91,26 @@ public class ChatService {
 
         return SearchChatRoomResDto.builder()
                 .roomId(reqDto.getRoomId())
+                .chatRoom(chatRoom)
                 .chatRoomUserList(chatRoomUser)
                 .chatRoomMsgList(chatRoomMsg)
+                .build();
+    }
+
+    /**
+     * 메세지 응답 insert 전 resDto 먼저 만들기
+     */
+    public ChatRoomMsg generateChatRoomMsgBeforSend(UserInfoDto userContext, Long chatRoomMsgSeq, SendMsgReqDto reqDto) {
+        return ChatRoomMsg.builder()
+                .roomId(reqDto.getRoomId()) // 방번호
+                .msgId(chatRoomMsgSeq) // 메세지번호
+                .sndUserNo(userContext.getUserNo()) // 발신자 회원번호
+                .sndName(userContext.getName()) // 발신자 성함
+                .msgTypCd("01") // 메세지 타입
+                .msgContent(reqDto.getMsgContent()) // 메세지 내용
+                //.mineYn("")
+                .delYn("N") // 삭제여부
+                .createTm(LocalDateTime.now()) // 생성시간
                 .build();
     }
 }
