@@ -28,10 +28,6 @@ public class ChatController {
 
         Long userNo = UserContext.getUserNo();
 
-        System.out.println("roomId: " + roomId);
-
-        System.out.println("userNo = " + userNo);
-
         SearchChatRoomReqDto reqDto = SearchChatRoomReqDto.builder()
                                                             .roomId(roomId)
                                                             .userNo(userNo)
