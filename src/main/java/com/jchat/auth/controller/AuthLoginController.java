@@ -5,6 +5,7 @@ import com.jchat.auth.dto.AuthLoginResDto;
 import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.auth.service.AuthLoginService;
 import com.jchat.common.annotation.NoAuth;
+import com.jchat.common.dto.ApiResponse;
 import com.jchat.common.util.CookieUtil;
 import com.jchat.common.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,22 +39,17 @@ public class AuthLoginController {
      */
     @NoAuth
     @PostMapping("/login")
-    public ResponseEntity<AuthLoginResDto> AuthLogin(@RequestBody @Valid AuthLoginReqDto authLoginReqDto, HttpServletResponse response) {
+    public AuthLoginResDto AuthLogin(@RequestBody @Valid AuthLoginReqDto authLoginReqDto, HttpServletResponse response) {
 
         AuthLoginResDto resDto = new AuthLoginResDto();
 
-        try {
-            resDto = authLoginService.AuthLogin(authLoginReqDto);
+        resDto = authLoginService.AuthLogin(authLoginReqDto);
 
-            // 쿠키에 토큰 추가
-            jwtUtil.addAccessTokenCookie(response, resDto.getAccessToken());
-            jwtUtil.addRefreshTokenCookie(response, resDto.getRefreshToken());
+        // 쿠키에 토큰 추가
+        jwtUtil.addAccessTokenCookie(response, resDto.getAccessToken());
+        jwtUtil.addRefreshTokenCookie(response, resDto.getRefreshToken());
 
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(resDto);
-        }
-
-        return ResponseEntity.ok(resDto);
+        return resDto;
     }
 
     @NoAuth

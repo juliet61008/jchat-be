@@ -2,6 +2,7 @@ package com.jchat.auth.service;
 
 import com.jchat.auth.dto.*;
 import com.jchat.auth.mapper.AuthLoginMapper;
+import com.jchat.common.advice.CustomException;
 import com.jchat.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,19 +27,19 @@ public class AuthLoginService {
         // 객체 null 체크
         if (passwordByIdResDto == null) {
             // 아이디 없음
-            return AuthLoginResDto.builder().code(-2).build();
+            throw new CustomException(-2, "존재하지 않는 회원");
         }
         // 객체 정상
         else {
             // 아이디 조회 불가
             if (passwordByIdResDto.getPassword().isEmpty()) {
                 // 아이디 없음
-                return AuthLoginResDto.builder().code(-2).build();
+                throw new CustomException(-2, "존재하지 않는 회원");
             }
         }
 
         if (!this.isMatchPassword(reqDto.getPassword(), passwordByIdResDto.getPassword())) {
-            return AuthLoginResDto.builder().code(-3).build();
+            throw new CustomException(-3, "비번틀림");
         }
 
         // 유저정보 조회
@@ -46,14 +47,13 @@ public class AuthLoginService {
 
         // 유저정보 조회 불가
         if (userInfoDto == null) {
-            return AuthLoginResDto.builder().code(-1).build();
+            throw new CustomException(-1, "로그인 불가");
         }
 
         String accessToken = jwtUtil.generateAccessToken(userInfoDto);
         String refreshToken = jwtUtil.generateRefreshToken(userInfoDto.getUserNo());
 
         return AuthLoginResDto.builder()
-                .code(0)
                 .userInfoDto(userInfoDto) // 유저정보
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

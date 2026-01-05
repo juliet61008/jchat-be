@@ -15,7 +15,5 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthLoginResDto extends TokenDto {
-    @Builder.Default
-    private int code = -1;
     private UserInfoDto userInfoDto;
 }
