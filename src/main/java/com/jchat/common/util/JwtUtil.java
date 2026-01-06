@@ -4,9 +4,9 @@ import com.jchat.auth.dto.UserInfoDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -21,6 +21,10 @@ public class JwtUtil {
     private final SecretKey secretKey;
     private final long accessTokenValidity;
     private final long refreshTokenValidity;
+    @Value("${cookie.secure}")
+    private boolean cookieSecure;
+    @Value("${cookie.same-site}")
+    private String cookieSameSite;
 
     public JwtUtil(
             @Value("${jwt.secret}") String secret,
@@ -101,40 +105,52 @@ public class JwtUtil {
 
     // 쿠키에 Access Token 추가
     public void addAccessTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("accessToken", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);  // 로컬: false, 운영: true
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (accessTokenValidity / 1000));
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("accessToken", token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(accessTokenValidity / 1000)
+                .sameSite(cookieSameSite)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     // 쿠키에 Refresh Token 추가
     public void addRefreshTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("refreshToken", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (refreshTokenValidity / 1000));
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge((int) (refreshTokenValidity / 1000))
+                .sameSite(cookieSameSite)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     // 쿠키 삭제
     public void deleteTokenCookies(HttpServletResponse response) {
-        Cookie accessTokenCookie = new Cookie("accessToken", null);
-        accessTokenCookie.setMaxAge(0);
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setHttpOnly(true);  // 추가
-        accessTokenCookie.setSecure(false);   // 추가
+        // accessToken 삭제
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0)  // 즉시 만료
+                .sameSite(cookieSameSite)
+                .build();
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-        refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setHttpOnly(true);  // 추가
-        refreshTokenCookie.setSecure(false);   // 추가
+        // refreshToken 삭제
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0)  // 즉시 만료
+                .sameSite(cookieSameSite)
+                .build();
 
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
     }
 
 }
