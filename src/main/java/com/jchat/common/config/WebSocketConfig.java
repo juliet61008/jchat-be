@@ -2,9 +2,9 @@ package com.jchat.common.config;
 
 import com.jchat.common.interceptor.JwtWsChannelInterceptor;
 import com.jchat.common.interceptor.JwtWsHandshakeInterceptor;
-import com.jchat.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -21,9 +21,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final JwtUtil jwtUtil;
     private final JwtWsHandshakeInterceptor jwtWsHandshakeInterceptor;
     private final JwtWsChannelInterceptor jwtWsChannelInterceptor;
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Bean
     public TaskScheduler taskScheduler() {
@@ -47,6 +49,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
+                .setAllowedOrigins(allowedOrigins)
                 .addInterceptors(jwtWsHandshakeInterceptor);
     }
 

@@ -15,14 +15,12 @@ public class WebConfig implements WebMvcConfigurer {
     private final JwtInterceptor jwtInterceptor;
 
     @Value("${cors.allowed-origins}")
-    private String frontendUrl;
-    @Value("${test.env}")
-    private String testEnv;
+    private String allowedOrigins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")  // 모든 경로에 대해
-                .allowedOrigins(frontendUrl)  // Next.js 출처 허용
+                .allowedOrigins(allowedOrigins)  // Next.js 출처 허용
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)  // 쿠키, 인증 헤더 허용
