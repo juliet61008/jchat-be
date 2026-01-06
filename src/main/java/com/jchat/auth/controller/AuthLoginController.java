@@ -55,7 +55,6 @@ public class AuthLoginController {
     @NoAuth
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
-        System.out.println("현재 쿠키들: " + Arrays.toString(request.getCookies()));
         // 쿠키 삭제
         jwtUtil.deleteTokenCookies(response);
         return ResponseEntity.ok("로그아웃 성공");
