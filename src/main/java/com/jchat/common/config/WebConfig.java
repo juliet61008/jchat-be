@@ -14,8 +14,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
 
-    @Value("${jchat.fe.url}")
+    @Value("${cors.allowed-origins}")
     private String frontendUrl;
+    @Value("${test.env}")
+    private String testEnv;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

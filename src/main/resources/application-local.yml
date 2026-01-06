@@ -4,7 +4,7 @@ spring:
   # 데이터소스 설정 - DB 연결 정보
   datasource:
     # JDBC URL - localhost:5432는 PostgreSQL 기본 포트, your_database는 DB명
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_URI}?${DB_QUERY_STRING}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_URI}?${DB_QUERY_STRING:prepareThreshold=0&preparedStatementCacheQueries=0}
     # DB 접속 계정
     username: ${DB_NAME}
     # DB 접속 비밀번호
@@ -18,7 +18,7 @@ spring:
       idle-timeout: 600000
 
 server:
-  port: ${PORT}
+  port: ${PORT:8080}
 
 # MyBatis 설정
 mybatis:
@@ -30,8 +30,8 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     # NULL 값 처리
     call-setters-on-nulls: true
-  #    default-executor-type: SIMPLE # REUSE 대신 SIMPLE
-  #    local-cache-scope: STATEMENT # 캐시 범위 축소
+#    default-executor-type: SIMPLE # REUSE 대신 SIMPLE
+#    local-cache-scope: STATEMENT # 캐시 범위 축소
   # Mapper XML 파일 위치 (classpath: = src/main/resources/)
   mapper-locations: classpath:mapper/**/*.xml
 
@@ -42,4 +42,4 @@ jwt:
   refresh-token-validity: 604800000  # 7일 (밀리초)
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
