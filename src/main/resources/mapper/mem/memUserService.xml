@@ -5,7 +5,7 @@
 <mapper namespace="com.jchat.mem.mapper.MemUserMapper">
 
     <select id="searchUserList" resultType="com.jchat.mem.dto.SearchUserListResDto">
-        /* [authLoginService.searchUserList] 유저리스트 [juliet61008/25.12.11]*/
+        /* [memUserService.searchUserList] 유저리스트 [juliet61008/25.12.11]*/
         with wt_user_relation_mine as (
             select b1.user_no
                  , b1.relation_user_no

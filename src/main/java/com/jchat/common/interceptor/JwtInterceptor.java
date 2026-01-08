@@ -3,7 +3,6 @@ package com.jchat.common.interceptor;
 import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.common.annotation.NoAuth;
 import com.jchat.common.context.UserContext;
-import com.jchat.common.util.CookieUtil;
 import com.jchat.common.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,13 +34,35 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
-        // @NoAuth 있으면 토큰 검증 생략
-        if (handlerMethod.hasMethodAnnotation(NoAuth.class)) {
-            return true;
+        // 쿠키에서 accessToken 추출
+        String authHeader = request.getHeader("Authorization");
+
+        String accessToken;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            accessToken = "";
+        } else {
+            accessToken = authHeader.substring(7);
         }
 
-        // 쿠키에서 accessToken 추출
-        String accessToken = CookieUtil.extractTokenFromCookie(request, "accessToken");
+        // @NoAuth 있으면 토큰 검증 생략
+        if (handlerMethod.hasMethodAnnotation(NoAuth.class)) {
+
+            if (accessToken.isEmpty() && jwtUtil.validateToken(accessToken)) {
+                // 토큰에서 사용자 정보 추출해서 request에 저장
+                UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(accessToken);
+
+                // UserContext 셋
+                UserContext.setUserInfo(userInfo);
+
+                request.setAttribute("userInfo", userInfo);
+                request.setAttribute("id", userInfo.getId());
+                request.setAttribute("userNo", userInfo.getUserNo());
+                request.setAttribute("name", userInfo.getName());
+                request.setAttribute("birth", userInfo.getBirth());
+            }
+
+            return true;
+        }
 
         // accessToken 없거나 검증 걸림
         if (accessToken == null || !jwtUtil.validateToken(accessToken)) {

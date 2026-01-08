@@ -1,5 +1,6 @@
 package com.jchat.mem.controller;
 
+import com.jchat.common.advice.CustomException;
 import com.jchat.common.context.UserContext;
 import com.jchat.mem.dto.*;
 import com.jchat.mem.service.MemFriendService;
@@ -27,8 +28,7 @@ public class MemFriendController {
     public ResponseEntity<?> searchFriendList() {
 
         if (!UserContext.hasUser()) {
-            return ResponseEntity.status(401)
-                .body(Map.of("code", 401, "message", "No access token"));
+            throw new CustomException(401, "Unauthorized");
         }
 
         return ResponseEntity.ok(memFriendService.searchFriendList(UserContext.getUserNo()));

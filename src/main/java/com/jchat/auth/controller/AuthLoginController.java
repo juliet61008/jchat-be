@@ -2,9 +2,12 @@ package com.jchat.auth.controller;
 
 import com.jchat.auth.dto.AuthLoginReqDto;
 import com.jchat.auth.dto.AuthLoginResDto;
+import com.jchat.auth.dto.TokenDto;
 import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.auth.service.AuthLoginService;
+import com.jchat.common.advice.CustomException;
 import com.jchat.common.annotation.NoAuth;
+import com.jchat.common.context.UserContext;
 import com.jchat.common.dto.ApiResponse;
 import com.jchat.common.util.CookieUtil;
 import com.jchat.common.util.JwtUtil;
@@ -13,11 +16,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.el.parser.Token;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -62,23 +63,27 @@ public class AuthLoginController {
 
     @NoAuth
     @PostMapping("/refreshToken")
-    public ResponseEntity<?> refresh(
+    public TokenDto refresh(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
         // 1. refreshToken 추출
-        String refreshToken = CookieUtil.extractTokenFromCookie(request, "refreshToken");
+        String authHeader = request.getHeader("Authorization");
 
-        if (refreshToken == null) {
-            return ResponseEntity.status(401)
-                    .body(Map.of("code", 401, "message", "No refresh token"));
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new CustomException(401, "No refresh token");
+        }
+
+        String refreshToken = authHeader.substring(7);
+
+        if (refreshToken.isEmpty()) {
+            throw new CustomException(401, "No refresh token");
         }
 
         // 2. refreshToken 검증
         if (!jwtUtil.validateToken(refreshToken)) {
-            // refreshToken도 만료 → 재로그인 필요
-            return ResponseEntity.status(401)
-                    .body(Map.of("code", 401, "message", "Refresh token expired"));
+            // refreshToken도 만료 > 재로그인 필요
+            throw new CustomException(401, "Refresh token expired");
         }
 
         // 3. 사용자 정보 추출
@@ -93,9 +98,15 @@ public class AuthLoginController {
         String newRefreshToken = jwtUtil.generateRefreshToken(userInfo.getUserNo());
         jwtUtil.addRefreshTokenCookie(response, newRefreshToken);
 
-        return ResponseEntity.ok(Map.of(
-                "code", 200,
-                "message", "Token refreshed"
-        ));
+        return TokenDto.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
+
+    @NoAuth
+    @GetMapping("/isLogin")
+    public boolean igLogin() {
+        return UserContext.hasUser();
     }
 }

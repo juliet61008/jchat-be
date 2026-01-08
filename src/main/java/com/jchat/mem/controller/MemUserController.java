@@ -28,7 +28,6 @@ public class MemUserController {
     public void searchUser(@PathVariable String id) {
         SearchUserReqDto reqDto = new SearchUserReqDto().builder().id(id).build();
         SearchUserResDto resDto = memUserService.searchUser(reqDto);
-        System.out.println("==================");
         log.info("id : {} , name : {}", resDto.getId(), resDto.getName());
     }
 

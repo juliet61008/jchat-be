@@ -21,15 +21,15 @@ import java.util.Map;
 /**
  * WebSocket 핸드셰이크 인터셉터
  *
+ * 주의: STOMP 사용 시 이 인터셉터는 connectHeaders를 받을 수 없음
+ * Authorization 헤더는 JwtWsChannelInterceptor에서 처리됩니다
+ *
  * 역할:
- * - WebSocket 연결 시도 시 토큰 검증
- * - 토큰이 없거나 유효하지 않으면 401 Unauthorized 반환
- * - 프론트엔드 미들웨어가 리프레시 토큰 요청 가능하도록 처리
+ * - WebSocket HTTP 업그레이드 시점의 기본 검증
+ * - Query Parameter 기반 인증 (선택사항)
  *
  * 인증 정책:
- * - 토큰 없음: 401 (프론트에서 리프레시 시도)
- * - 토큰 유효하지 않음: 401 (프론트에서 리프레시 시도)
- * - 토큰 유효: 연결 허용 + 사용자 정보 Session에 저장
+ * - 현재는 모든 연결 허용 (인증은 ChannelInterceptor에서 처리)
  */
 @Slf4j
 @Component
@@ -37,7 +37,6 @@ import java.util.Map;
 public class JwtWsHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtUtil jwtUtil;
-
     @Override
     public boolean beforeHandshake(
             ServerHttpRequest request,
@@ -51,40 +50,35 @@ public class JwtWsHandshakeInterceptor implements HandshakeInterceptor {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
 
-            // 1. 쿠키에서 accessToken 추출
-            String accessToken = extractTokenFromCookie(httpRequest, "accessToken");
+            String origin = httpRequest.getHeader("Origin");
+            log.info("WebSocket 핸드셰이크 - Origin: {}", origin);
+            //  Query Parameter로 토큰을 받는 경우만 여기서 처리
+            String tokenFromQuery = httpRequest.getParameter("token");
 
-            log.info("handshake accessToken : {}", accessToken);
+            if (tokenFromQuery != null && !tokenFromQuery.isEmpty()) {
+                log.info("Query Parameter에서 토큰 발견");
 
-            // 2. 토큰이 없는 경우 → 401
-            if (accessToken == null) {
-                log.warn("토큰 없음");
-//                return reject401(response, "토큰이 없습니다");
-            }
-
-            // 3. 토큰이 유효하지 않은 경우 → 401
-            if (!jwtUtil.validateToken(accessToken)) {
-                log.warn("유효하지 않은 토큰");
-//                return reject401(response, "유효하지 않은 토큰입니다");
+                if (jwtUtil.validateToken(tokenFromQuery)) {
+                    UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(tokenFromQuery);
+                    attributes.put("userInfo", userInfo);
+                    attributes.put("userNo", userInfo.getUserNo());
+                    attributes.put("id", userInfo.getId());
+                    attributes.put("name", userInfo.getName());
+                    attributes.put("birth", userInfo.getBirth());
+                    attributes.put("authenticated", true);
+                    log.info("Query Parameter 토큰 인증 성공 - id: {}", userInfo.getId());
+                } else {
+                    log.warn("Query Parameter 토큰 유효하지 않음");
+                    return reject401(response, "유효하지 않은 토큰입니다");
+                }
             } else {
-                // 4. 토큰 유효 → 사용자 정보 저장
-                UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(accessToken);
-
-                attributes.put("userInfo", userInfo);
-                attributes.put("userNo", userInfo.getUserNo());
-                attributes.put("id", userInfo.getId());
-                attributes.put("name", userInfo.getName());
-                attributes.put("birth", userInfo.getBirth());
-                attributes.put("authenticated", true);
-
-                log.info("WebSocket 연결 성공 - id: {}, userName: {}",
-                        userInfo.getId(), userInfo.getName());
+                // !!! 수정: 토큰 없어도 연결 허용 (STOMP CONNECT에서 인증할 예정) !!!
+                log.info("토큰 없음 - STOMP CONNECT에서 인증 예정");
             }
 
             return true;
         }
 
-        // ServletServerHttpRequest가 아닌 경우 (일반적으로 발생 안 함)
         log.error("ServletServerHttpRequest 타입이 아님");
         return reject401(response, "잘못된 요청입니다");
     }
@@ -102,35 +96,21 @@ public class JwtWsHandshakeInterceptor implements HandshakeInterceptor {
         }
     }
 
-    /**
-     * 401 Unauthorized 응답 반환
-     *
-     * @param response HTTP 응답
-     * @param message 에러 메시지
-     * @return false (연결 거부)
-     */
     private boolean reject401(ServerHttpResponse response, String message) throws IOException {
         if (response instanceof ServletServerHttpResponse) {
             ServletServerHttpResponse servletResponse = (ServletServerHttpResponse) response;
-
             servletResponse.setStatusCode(HttpStatus.UNAUTHORIZED);
             servletResponse.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
-
             String jsonResponse = String.format(
                     "{\"code\":401,\"message\":\"%s\"}",
                     message
             );
-
             servletResponse.getBody().write(jsonResponse.getBytes("UTF-8"));
             servletResponse.getBody().flush();
         }
-
         return false;
     }
 
-    /**
-     * 쿠키에서 토큰 추출
-     */
     private String extractTokenFromCookie(HttpServletRequest request, String cookieName) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {

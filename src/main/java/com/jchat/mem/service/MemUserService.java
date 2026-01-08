@@ -1,6 +1,8 @@
 package com.jchat.mem.service;
 
+import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.common.constants.CommonConstants;
+import com.jchat.common.context.UserContext;
 import com.jchat.mem.dto.*;
 import com.jchat.mem.mapper.MemUserMapper;
 import lombok.RequiredArgsConstructor;

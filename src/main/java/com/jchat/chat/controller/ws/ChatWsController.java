@@ -45,7 +45,6 @@ public class ChatWsController {
      * @param reqDto
      */
     @MessageMapping("/chat/send/{roomId}")
-//    @SendTo("/topic/chat/send/{roomId}")
     public void sendMsg(
             @DestinationVariable Long roomId,
             @Payload SendMsgReqDto reqDto,
