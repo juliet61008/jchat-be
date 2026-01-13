@@ -44,10 +44,10 @@ public class JwtInterceptor implements HandlerInterceptor {
             accessToken = authHeader.substring(7);
         }
 
-        // @NoAuth 있으면 토큰 검증 생략
+        // @NoAuth 있는 경우 무조건 true
         if (handlerMethod.hasMethodAnnotation(NoAuth.class)) {
 
-            if (accessToken.isEmpty() && jwtUtil.validateToken(accessToken)) {
+            if (!accessToken.isEmpty() && jwtUtil.validateToken(accessToken)) {
                 // 토큰에서 사용자 정보 추출해서 request에 저장
                 UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(accessToken);
 
