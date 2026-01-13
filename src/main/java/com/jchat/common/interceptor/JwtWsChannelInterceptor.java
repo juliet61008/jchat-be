@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -47,24 +48,24 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         try {
 
-        StompHeaderAccessor accessor =
-                MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+            StompHeaderAccessor accessor =
+                    MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null) {
-            StompCommand command = accessor.getCommand();
+            if (accessor != null) {
+                StompCommand command = accessor.getCommand();
 
-            if (StompCommand.CONNECT.equals(command)) {
-                handleConnect(accessor);
+                if (StompCommand.CONNECT.equals(command)) {
+                    handleConnect(accessor);
+                }
+                else if (StompCommand.SEND.equals(command)) {
+                    handleSend(accessor);
+                }
+                else if (StompCommand.DISCONNECT.equals(command)) {
+                    handleDisconnect(accessor);
+                }
             }
-            else if (StompCommand.SEND.equals(command)) {
-                handleSend(accessor);
-            }
-            else if (StompCommand.DISCONNECT.equals(command)) {
-                handleDisconnect(accessor);
-            }
-        }
 
-        return message;
+            return message;
         } catch (Exception e) {
             log.error("❌❌❌ preSend에서 예외 발생!", e);
             throw e; // ✅ 예외를 다시 던져야 ERROR 프레임 전송됨
@@ -101,7 +102,7 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
         Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
 
         // Authorization 헤더가 있으면 검증
-         if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String accessToken = authHeader.substring(7);
              log.info("CONNECT - accessToken: {}", accessToken);
 
@@ -122,7 +123,8 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
             } else {
                 // 토큰 유효하지 않으면 인증 실패
                 log.warn("WebSocket CONNECT - 토큰 유효하지 않음");
-                sessionAttributes.put("authenticated", false);
+                throw new MessagingException("401:Invalid token");
+//                sessionAttributes.put("authenticated", false);
             }
         } else {
             // Authorization 헤더 없으면 익명 처리

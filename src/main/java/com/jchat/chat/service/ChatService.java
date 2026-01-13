@@ -3,6 +3,7 @@ package com.jchat.chat.service;
 import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.chat.dto.*;
 import com.jchat.chat.mapper.ChatMapper;
+import com.jchat.common.advice.CustomException;
 import com.jchat.common.context.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -97,6 +98,8 @@ public class ChatService {
         List<ChatRoomUser> chatRoomUser = chatMapper.searchChatRoomUser(reqDto);
         // 채팅방메세지리스트 조회
         List<ChatRoomMsg> chatRoomMsg = chatMapper.searchChatRoomMsg(reqDto);
+
+        if (chatRoom == null) throw new CustomException(-1, "채팅방이 조회되지 않았습니다.");
 
         return SearchChatRoomDtlResDto.builder()
                 .roomId(reqDto.getRoomId())

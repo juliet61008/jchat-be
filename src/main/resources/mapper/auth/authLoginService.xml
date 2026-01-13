@@ -19,7 +19,6 @@
         where
             id = #{id}
         and secn_yn = 'N'
-
     </select>
 
     <select id="searchPasswordById" resultType="com.jchat.auth.dto.PasswordByIdResDto">
@@ -29,6 +28,16 @@
             tbo_user
         where
             id = #{id}
+        and secn_yn = 'N'
+    </select>
+
+    <select id="searchUserInfoByUserNo" resultType="com.jchat.auth.dto.UserInfoDto">
+        select /* [authLoginService.searchUserInfoByUserNo] 로그인 인증 조회 [juliet61008/25.12.03]*/
+            <include refid="selectTboUser" />
+        from
+            tbo_user
+        where
+            user_no = #{userNo}
         and secn_yn = 'N'
     </select>
 </mapper>
