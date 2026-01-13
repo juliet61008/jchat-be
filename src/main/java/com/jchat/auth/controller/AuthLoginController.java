@@ -4,6 +4,7 @@ import com.jchat.auth.dto.AuthLoginReqDto;
 import com.jchat.auth.dto.AuthLoginResDto;
 import com.jchat.auth.dto.TokenDto;
 import com.jchat.auth.dto.UserInfoDto;
+import com.jchat.auth.mapper.AuthLoginMapper;
 import com.jchat.auth.service.AuthLoginService;
 import com.jchat.common.advice.CustomException;
 import com.jchat.common.annotation.NoAuth;
@@ -31,6 +32,7 @@ public class AuthLoginController {
 
     private final AuthLoginService authLoginService;
     private final JwtUtil jwtUtil;
+    private final AuthLoginMapper authLoginMapper;
 
     /**
      * 로그인
@@ -87,7 +89,8 @@ public class AuthLoginController {
         }
 
         // 3. 사용자 정보 추출
-        UserInfoDto userInfo = jwtUtil.getUserInfoFromToken(refreshToken);
+        UserInfoDto tmpUserInfo = jwtUtil.getUserInfoFromToken(refreshToken);
+        UserInfoDto userInfo = authLoginMapper.searchUserInfoByUserNo(tmpUserInfo.getUserNo());
 
         // 4. 새 accessToken 발급
         String newAccessToken = jwtUtil.generateAccessToken(userInfo);

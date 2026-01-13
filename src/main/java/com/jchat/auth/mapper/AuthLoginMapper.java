@@ -10,4 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
 public interface AuthLoginMapper {
     UserInfoDto searchAuthLogin(AuthLoginReqDto authLoginReqDto);
     PasswordByIdResDto searchPasswordById(PasswordByIdReqDto passwordByIdReqDto);
+    UserInfoDto searchUserInfoByUserNo(Long userNo);
 }
