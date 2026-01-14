@@ -4,6 +4,7 @@ import com.jchat.chat.dto.SearchChatRoomDtlReqDto;
 import com.jchat.chat.dto.SearchChatRoomDtlResDto;
 import com.jchat.chat.dto.SearchChatRoomListResDto;
 import com.jchat.chat.service.ChatService;
+import com.jchat.common.advice.CustomException;
 import com.jchat.common.context.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +28,16 @@ public class ChatController {
      * 채팅방 리스트 정보 조회
      */
     @GetMapping("/room")
-    public ResponseEntity<List<SearchChatRoomListResDto>> searchChatRoomListResDto() {
+    public List<SearchChatRoomListResDto> searchChatRoomListResDto() {
 
         // 유저컨텍스트 없는 경우
         if (!UserContext.hasUser()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            throw new CustomException(-1, "유저 정보가 없습니다.");
         }
 
         List<SearchChatRoomListResDto> resDto = chatService.searhcChatRoomList();
 
-        return ResponseEntity.ok(resDto);
+        return resDto;
     }
 
     /**
