@@ -126,12 +126,30 @@
 
     <select id="searchChatRoomList" resultType="com.jchat.chat.dto.SearchChatRoomListResDto">
         /* [chatService.searchChatRoomList] 채팅방 리스트 조회 [juliet61008/26.01.02] */
+        with wt_chat_room_user_mine as (
+            select *
+            from tbo_chat_room_user
+            where user_no = #{userNo}
+        )
+       , wt_chat_room_msg_last as (
+            select t1.room_id, t1.msg_id, t1.msg_content, t1.create_tm
+            from tbo_chat_room_msg t1
+                     join (
+                            select room_id, max(msg_id) as max_msg_id
+                            from tbo_chat_room_msg
+                            group by room_id
+                        ) t2 ON t1.room_id = t2.room_id AND t1.msg_id = t2.max_msg_id
+        )
         select
             a2.room_id /* 채팅방 번호 */
             , a2.room_name /* 채팅방 이름 */
-            , coalesce(room_name,
+            , coalesce(nullif(trim(room_name), ''),
                        case
-                           when (select count(1) from tbo_chat_room_user a3 where a3.room_id = a2.room_id ) > 3
+                           when nullif(
+                                   (select trim(a3.room_alias_nm) from wt_chat_room_user_mine a3 where a3.room_id = a2.room_id)
+                               , '') is not null
+                           then (select trim(a3.room_alias_nm) from wt_chat_room_user_mine a3 where a3.room_id = a2.room_id)
+                           when (select count(1) from tbo_chat_room_user a3 where a3.room_id = a2.room_id ) <![CDATA[ > ]]> 3
                                then  (
                                select string_agg(name, ', ') || ' 외 ' || ((select count(1) from tbo_chat_room_user where room_id = a2.room_id and join_yn = 'Y') - 3)::varchar || '명'
                                from (
@@ -151,34 +169,36 @@
             , a2.last_msg_content
             , a2.last_msg_create_tm
         from (
-                 select
-                     a1.room_id
+                select
+                        a1.room_id
                       , a1.room_name
                       , b1.user_no
                       , a1.room_cd
                       , c1.name
                       , d1.alias_nm
                       , b1.like_yn
-                      , (select msg_content from tbo_chat_room_msg where room_id = a1.room_id order by msg_id desc fetch first 1 rows only) as last_msg_content
-                      , (select create_tm from tbo_chat_room_msg where room_id = a1.room_id order by msg_id desc fetch first 1 rows only) as last_msg_create_tm
-                      , (select msg_id from tbo_chat_room_msg where room_id = a1.room_id order by msg_id desc fetch first 1 rows only) as last_msg_id
-                 from
-                     tbo_chat_room a1
-                         left join
-                     tbo_chat_room_user b1
-                     on
-                         a1.room_id = b1.room_id
-                         left join
-                     tbo_user c1 /* 내유저 */
-                     on
-                         c1.user_no = b1.user_no
-                         left join tbo_user_relation d1
-                                   on d1.user_no = #{userNo}
-                                       and c1.user_no = d1.relation_user_no
-                         inner join tbo_chat_room_user e1
-                                    on a1.room_id = e1.room_id
-                                        and e1.join_yn = 'Y'
-                                        and e1.user_no = #{userNo}
+                      , e1.msg_content as last_msg_content
+                      , e1.create_tm as last_msg_create_tm
+                      , e1.msg_id as last_msg_id
+                from
+                    tbo_chat_room a1
+                join
+                    wt_chat_room_user_mine b1
+                on
+                    a1.room_id = b1.room_id
+                left join
+                    tbo_user c1 /* 유저목록 */
+                on
+                    c1.user_no = b1.user_no
+                left join
+                    tbo_user_relation d1
+                on
+                    d1.user_no = c1.user_no
+                and c1.user_no = d1.relation_user_no
+                join
+                    wt_chat_room_msg_last e1
+                on
+                    e1.room_id = a1.room_id
              ) a2
         group by
             a2.room_id
