@@ -1,11 +1,10 @@
 package com.jchat.chat.controller.ws;
 
 import com.jchat.auth.dto.UserInfoDto;
-import com.jchat.chat.dto.ChatRoomMsg;
-import com.jchat.chat.dto.SendMsgReqDto;
-import com.jchat.chat.dto.SendMsgResDto;
+import com.jchat.chat.dto.*;
 import com.jchat.chat.service.ChatService;
 import com.jchat.chat.util.ChatSequenceProvider;
+import com.jchat.common.advice.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -86,5 +85,35 @@ public class ChatWsController {
 //                .roomId(roomId)
 //                .chatRoomMsg(chatRoomMsg)
 //                .build();
+    }
+
+    @MessageMapping("/chat/read/{roomId}")
+    public void readMsg(@DestinationVariable Long roomId,
+                        @Payload ReadMsgReqDto reqDto,
+                        SimpMessageHeaderAccessor headerAccessor) {
+
+        // 세션
+        Map<String, Object> attrs = headerAccessor.getSessionAttributes();
+        // userContext
+        UserInfoDto userContext = (UserInfoDto) attrs.get("userInfo");
+
+        if (userContext == null) {
+            throw new CustomException(-1, "msg read 에러");
+        }
+
+        // 선발행
+        simpMessagingTemplate.convertAndSend("/topic/chat/read/" + roomId
+                , ReadMsgResDto.builder()
+                        .roomId(roomId)
+                        .userNo(userContext.getUserNo())
+                        .lastReadMsgNo(reqDto.getLastReadMsgNo())
+                        .lastReadCreateTm(reqDto.getLastReadCreateTm())
+        );
+
+        // 유저정보 set
+        reqDto.setUserNo(userContext.getUserNo());
+        // 읽음처리 비동기
+        chatService.readMsg(reqDto);
+
     }
 }
