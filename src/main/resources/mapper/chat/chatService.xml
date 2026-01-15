@@ -89,6 +89,31 @@
             )
     </insert>
 
+    <update id="upsertChatRoomRead">
+        /* [chatService.upsertChatRoomRead] 마지막 채팅방 조회 upsert [juliet61008/26.01.15] */
+        INSERT INTO
+            tbo_chat_room_read (
+                                room_id
+                               , user_no
+                               , last_read_msg_id
+                               , last_read_create_tm
+                               , create_tm
+                               , update_tm)
+        VALUES (
+                #{roomId}
+               , #{userNo}
+               , #{lastReadMsgId}
+               , #{lastReadCreateTm}
+               , now()
+               , now()
+               )
+        ON CONFLICT (room_id, user_no)
+        DO UPDATE SET
+            last_read_msg_id = GREATEST(tbo_chat_room_read.last_read_msg_id, EXCLUDED.last_read_msg_id)
+            , last_read_create_tm = GREATEST(tbo_chat_room_read.last_read_create_tm, EXCLUDED.last_read_create_tm)
+            , update_tm = NOW()
+    </update>
+
     <select id="searchChatRoomMsgByPk" resultType="com.jchat.chat.dto.ChatRoomMsg">
         /* [chatService.searchChatRoomMsgByPk] 채팅메세지정보 PK로 조회 [juliet61008/25.12.10] */
         select

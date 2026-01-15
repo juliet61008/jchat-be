@@ -27,7 +27,7 @@ public class ChatService {
      * @return {{@link SendMsgResDto}0}
      */
     @Transactional
-    @Async("chatTaskExecutor")
+    @Async("sendMsgTaskExecutor")
     public void sendMsg(Long userNo, Long roomId, Long chatRoomMsgSeq, SendMsgReqDto sendMsgReqDto) {
 
         // 채팅 메세지 생성
@@ -49,6 +49,12 @@ public class ChatService {
 //        ChatRoomMsg chatRoomMsg = chatMapper.searchChatRoomMsgByPk(searchChatRoomMsgByPkReqDto);
 //
 //        return chatRoomMsg;
+    }
+
+    @Transactional
+    @Async("readMsgTaskExecutor")
+    public void readMsg(ReadMsgReqDto readMsgReqDto) {
+        chatMapper.upsertChatRoomRead(readMsgReqDto);
     }
 
     /**
