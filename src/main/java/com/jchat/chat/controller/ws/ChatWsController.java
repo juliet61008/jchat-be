@@ -15,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Controller
@@ -69,11 +70,11 @@ public class ChatWsController {
 
         // 메세지 선발행
         simpMessagingTemplate.convertAndSend("/topic/chat/send/" + roomId, SendMsgResDto.builder()
-                .tempId(reqDto.getTempId())
-                .roomId(roomId)
-                .chatRoomMsg(chatRoomMsg)
-                .build()
-                );
+                        .tempId(reqDto.getTempId())
+                        .roomId(roomId)
+                        .chatRoomMsg(chatRoomMsg)
+                        .build()
+        );
 
         Long userNo = userContext.getUserNo();
 
@@ -106,8 +107,9 @@ public class ChatWsController {
                 , ReadMsgResDto.builder()
                         .roomId(roomId)
                         .userNo(userContext.getUserNo())
-                        .lastReadMsgNo(reqDto.getLastReadMsgNo())
-                        .lastReadCreateTm(reqDto.getLastReadCreateTm())
+                        .lastReadMsgNo(reqDto.getLastReadMsgId())
+                        .lastReadCreateTm(LocalDateTime.now())
+                        .build()
         );
 
         // 유저정보 set

@@ -103,7 +103,7 @@
                 #{roomId}
                , #{userNo}
                , #{lastReadMsgId}
-               , #{lastReadCreateTm}
+               , now()
                , now()
                , now()
                )
@@ -276,6 +276,7 @@
                        then 'Y'
                    else 'N'
             end as mine_yn
+            , e1.last_read_msg_id
         from tbo_chat_room a1
                  left join tbo_chat_room_user b1
                            on a1.room_id = b1.room_id
@@ -283,6 +284,9 @@
                            on b1.user_no = c1.user_no
                  left join wt_user_relation_mine d1
                            on c1.user_no = d1.relation_user_no
+                 left join tbo_chat_room_read e1
+                           on c1.user_no = e1.user_no
+                          and a1.room_id = e1.room_id
         where a1.room_id = #{roomId}
           and a1.del_yn = 'N'
           and b1.join_yn = 'Y'
