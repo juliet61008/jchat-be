@@ -14,4 +14,5 @@ public class ChatRoomUser {
     private String name; // 회원이름
     private String friendYn; // 친구여부
     private String mineYn; // 내정보여부
+    private Long lastReadMsgId; // 마지막 읽은 메세지아이디
 }

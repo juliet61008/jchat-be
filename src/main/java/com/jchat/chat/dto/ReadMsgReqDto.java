@@ -1,5 +1,6 @@
 package com.jchat.chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,5 @@ public class ReadMsgReqDto {
     @JsonIgnore
     private Long userNo;
     // 마지막 조회 메세지 번호
-    private Long lastReadMsgNo;
-    // 마지막 조회 생성 날짜
-    private LocalDateTime lastReadCreateTm;
+    private Long lastReadMsgId;
 }
