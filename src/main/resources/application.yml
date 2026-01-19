@@ -42,6 +42,15 @@ jwt:
   access-token-validity: 3600000   # 1시간 (밀리초) 3600000 1시간 1800000 30분 60000 1분
   refresh-token-validity: 604800000  # 7일 (밀리초)
 
+# cloundflare
+cloudflare:
+  r2:
+    access-key: ${CLOUDFLARE_R2_ACCESSKEY}
+    secret-key: ${CLOUDFLARE_R2_SECRETKEY}
+    endpoint: ${CLOUDFLARE_R2_ENDPOINT}
+    bucket: ${CLOUDFLARE_R2_BUCKET}
+    cdn-host: ${CLOUDFLARE_R2_CDN_HOST}
+
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
 

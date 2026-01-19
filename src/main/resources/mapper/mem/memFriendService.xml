@@ -13,6 +13,7 @@
              , b1.like_yn
              , b1.block_yn
              , 'Y' as friend_yn
+             , e1.file_path || '/' || e1.file_name as profile_img_url
         from
             tbo_user a1
         left join
@@ -24,6 +25,18 @@
         on
             b1.relation_user_no = c1.user_no
         and c1.secn_yn = 'N'
+        left join
+            tbo_user_profile_img d1
+        on
+            c1.user_no = d1.user_no
+            and d1.main_yn = 'Y'
+            and d1.del_yn = 'N'
+            and d1.expo_yn = 'Y'
+        left join
+            com_file e1
+        on
+            d1.file_no = e1.file_no
+            and e1.del_yn = 'N'
     </sql>
 
     <select id="searchFriendList" resultType="com.jchat.mem.dto.ComOtherUser">

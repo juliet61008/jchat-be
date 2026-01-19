@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jchat.com.mapper.FileMapper">
+    <insert id="insertFile">
+        <selectKey keyProperty="fileNo" resultType="java.lang.Long" order="BEFORE">
+            select nextval('com_file_file_no_seq')
+        </selectKey>
+        insert into com_file (
+            file_no
+            , del_yn
+            , file_path
+            , file_name
+            , file_ext
+            , file_original_name
+            <if test='null != userNo and !"".equals(userNo)'>
+                , user_no
+            </if>
+            , create_tm
+            , update_tm
+        ) values (
+            #{fileNo}
+            , 'N'
+            , #{filePath}
+            , #{fileName}
+            , #{fileExt}
+            , #{fileOriginalName}
+            <if test='null != userNo and !"".equals(userNo)'>
+                , #{userNo}
+            </if>
+            , now()
+            , now()
+        )
+    </insert>
+
+    <update id="updateFile">
+        update
+            com_file
+        set
+            update_tm
+            <if test='null != delYn and !"".equals(delYn)'>
+                , del_yn
+            </if>
+        where
+            file_no = #{fileNo}
+    </update>
+
+    <select id="selectFile">
+        select
+            file_no
+             , del_yn
+             , file_path
+             , file_name
+             , file_ext
+             , file_original_name
+             , create_tm
+             , update_tm
+        from
+            com_file
+        where
+            file_no = #{fileNo}
+        and del_yn = 'N'
+    </select>
+</mapper>
