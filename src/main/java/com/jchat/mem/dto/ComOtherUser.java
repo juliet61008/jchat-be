@@ -18,4 +18,5 @@ public class ComOtherUser {
     private String friendYn; // 타유저 친구여부
     private String likeYn; // 타유저 즐겨찾기 여부
     private String blockYn; // 타유저 친구차단 여부
+    private String profileImgUrl; // 프로필이미지 url
 }

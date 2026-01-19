@@ -3,6 +3,7 @@ package com.jchat.mem.service;
 import com.jchat.mem.dto.*;
 import com.jchat.mem.mapper.MemFriendMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,9 @@ import java.util.List;
 public class MemFriendService {
 
     private final MemFriendMapper memFriendMapper;
+
+    @Value("${cloudflare.r2.cdn-host}")
+    private String cdnHost;
 
     /**
      * 회원정보조회
@@ -33,6 +37,11 @@ public class MemFriendService {
     public SearchFriendListResDto searchFriendList(Long userNo) {
 
         List<ComOtherUser> comOtherUser = memFriendMapper.searchFriendList(userNo);
+
+        // 대표프로필이미지
+        for (ComOtherUser otherUser : comOtherUser) {
+            otherUser.setProfileImgUrl(cdnHost + otherUser.getProfileImgUrl());
+        }
 
         return SearchFriendListResDto.builder()
                 .myUserNo(userNo)
