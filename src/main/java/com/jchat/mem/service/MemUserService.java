@@ -3,6 +3,7 @@ package com.jchat.mem.service;
 import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.common.constants.CommonConstants;
 import com.jchat.common.context.UserContext;
+import com.jchat.mem.constants.MemUserConstants;
 import com.jchat.mem.dto.*;
 import com.jchat.mem.mapper.MemUserMapper;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,6 @@ public class MemUserService {
 
         List<SearchUserListResDto> resDto = memUserMapper.searchUserList(reqDto);
 
-
         return resDto;
     }
 
@@ -72,7 +72,24 @@ public class MemUserService {
         int cnt = memUserMapper.insertUser(reqDto);
 
         // 정상 insert 아닌 경우
-        if (1 > cnt) {
+        if (1 != cnt) {
+            return RegisterUserResDto.builder()
+                    .succYn(CommonConstants.N)
+                    .build();
+        }
+
+        // ROLE 권한
+        RegisterUserReqDto.InsertUserRoleReqDto insertUserRoleReqDto = RegisterUserReqDto.InsertUserRoleReqDto.builder()
+                .userNo(reqDto.getUserNo())
+                .roleId(MemUserConstants.USER_ROLE_2) // 일반회원 ROLE
+                .useYn(CommonConstants.Y)
+                .delYn(CommonConstants.N)
+                .build();
+
+        // ROLE 권한 삽입
+        int roleCnt = memUserMapper.insertUserRole(insertUserRoleReqDto);
+
+        if (1 > roleCnt) {
             return RegisterUserResDto.builder()
                     .succYn(CommonConstants.N)
                     .build();

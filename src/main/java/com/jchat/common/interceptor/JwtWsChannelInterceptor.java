@@ -117,6 +117,7 @@ public class JwtWsChannelInterceptor implements ChannelInterceptor {
                 sessionAttributes.put("id", userInfo.getId());
                 sessionAttributes.put("name", userInfo.getName());
                 sessionAttributes.put("birth", userInfo.getBirth());
+                sessionAttributes.put("roleIdList", userInfo.getRoleIdList());
                 sessionAttributes.put("authenticated", true);
 
                 log.info("WebSocket CONNECT - 인증 성공 (userId: {})", userInfo.getId());

@@ -17,33 +17,32 @@ public class AuthLoginService {
     private final JwtUtil jwtUtil;
 
     /**
-     * 로그인 인증 개발중. 추후 jwt 발급 로직 구현 예정
      * @param {{@link AuthLoginReqDto}} reqDto 로그인 인증 요청 DTO
      * @return {{@link AuthLoginResDto}} AuthLoginResDto 로그인 인증 응답 DTO
      */
     public AuthLoginResDto AuthLogin(AuthLoginReqDto reqDto) {
 
-        PasswordByIdResDto passwordByIdResDto = authLoginMapper.searchPasswordById(new PasswordByIdReqDto(reqDto.getId()));
+        LoginInfoByIdResDto loginInfoByIdResDto = authLoginMapper.searchLoginInfoById(new LoginInfoByIdReqDto(reqDto.getId()));
         // 객체 null 체크
-        if (passwordByIdResDto == null) {
+        if (loginInfoByIdResDto == null) {
             // 아이디 없음
             throw new CustomException(-2, "존재하지 않는 회원");
         }
         // 객체 정상
         else {
             // 아이디 조회 불가
-            if (passwordByIdResDto.getPassword().isEmpty()) {
+            if (loginInfoByIdResDto.getPassword().isEmpty()) {
                 // 아이디 없음
                 throw new CustomException(-2, "존재하지 않는 회원");
             }
         }
 
-        if (!this.isMatchPassword(reqDto.getPassword(), passwordByIdResDto.getPassword())) {
+        if (!this.isMatchPassword(reqDto.getPassword(), loginInfoByIdResDto.getPassword())) {
             throw new CustomException(-3, "비번틀림");
         }
 
         // 유저정보 조회
-        UserInfoDto userInfoDto = authLoginMapper.searchAuthLogin(reqDto);
+        UserInfoDto userInfoDto = authLoginMapper.searchUserInfoByUserNo(loginInfoByIdResDto.getUserNo());
 
         // 유저정보 조회 불가
         if (userInfoDto == null) {

@@ -43,6 +43,7 @@ public class JwtUtil {
         claims.put("name", userInfoDto.getName());
         claims.put("birth", userInfoDto.getBirth());
         claims.put("email", userInfoDto.getEmail());
+        claims.put("roleIdList", userInfoDto.getRoleIdList());
 
         return generateToken(claims, userInfoDto.getUserNo(), accessTokenValidity);
     }
@@ -81,6 +82,7 @@ public class JwtUtil {
                 .name(claims.get("name", String.class))
                 .birth(claims.get("birth", Integer.class))
                 .email(claims.get("email", String.class))
+                .roleIdList(claims.get("roleIdList", String.class))
                 .build();
     }
 
