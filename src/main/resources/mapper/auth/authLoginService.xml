@@ -11,19 +11,10 @@
         , email_id || '@' || email_domain  as email
     </sql>
 
-    <select id="searchAuthLogin" resultType="com.jchat.auth.dto.UserInfoDto">
-        select /* [authLoginService.searchAuthLogin] 로그인 인증 조회 [juliet61008/25.12.03]*/
-            <include refid="selectTboUser" />
-        from
-            tbo_user
-        where
-            id = #{id}
-        and secn_yn = 'N'
-    </select>
-
-    <select id="searchPasswordById" resultType="com.jchat.auth.dto.PasswordByIdResDto">
-        select /* [authLoginService.searchPasswordById] 아이디로 비밀번호 조회 [juliet61008/25.12.09]*/
-            password
+    <select id="searchLoginInfoById" resultType="com.jchat.auth.dto.LoginInfoByIdResDto">
+        select /* [authLoginService.searchLoginInfoById] 아이디로 로그인정보 조회 [juliet61008/25.12.09]*/
+            user_no
+            , password
         from
             tbo_user
         where
@@ -32,12 +23,26 @@
     </select>
 
     <select id="searchUserInfoByUserNo" resultType="com.jchat.auth.dto.UserInfoDto">
-        select /* [authLoginService.searchUserInfoByUserNo] 로그인 인증 조회 [juliet61008/25.12.03]*/
-            <include refid="selectTboUser" />
+        /* [authLoginService.searchUserInfoByUserNo] 로그인 인증 조회 [juliet61008/25.12.03]*/
+        select
+            a1.user_no                     as user_no
+            , a1.id                        as id
+            , a1.name                      as name
+            , a1.birth                     as birth
+            , a1.email_id || '@' || email_domain  as email
+            , string_agg(b1.role_id::varchar, '|' ORDER BY b1.role_id) as role_id_list
         from
-            tbo_user
+            tbo_user a1
+        join
+            tbo_user_role b1
+        on
+            a1.user_no = b1.user_no
+        and b1.del_yn = 'N'
+        and b1.use_yn = 'Y'
         where
-            user_no = #{userNo}
-        and secn_yn = 'N'
+            a1.user_no = #{userNo}
+        and a1.secn_yn = 'N'
+        group by
+            a1.user_no
     </select>
 </mapper>

@@ -1,6 +1,5 @@
 package com.jchat.mem.mapper;
 
-import com.jchat.auth.dto.UserInfoDto;
 import com.jchat.mem.dto.RegisterUserReqDto;
 import com.jchat.mem.dto.SearchUserListReqDto;
 import com.jchat.mem.dto.SearchUserListResDto;
@@ -12,4 +11,5 @@ import java.util.List;
 public interface MemUserMapper {
     List<SearchUserListResDto> searchUserList(SearchUserListReqDto reqDto);
     int insertUser(RegisterUserReqDto reqDto);
+    int insertUserRole(RegisterUserReqDto.InsertUserRoleReqDto reqDto);
 }

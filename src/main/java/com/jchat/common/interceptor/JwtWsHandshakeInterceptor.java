@@ -66,6 +66,7 @@ public class JwtWsHandshakeInterceptor implements HandshakeInterceptor {
                     attributes.put("id", userInfo.getId());
                     attributes.put("name", userInfo.getName());
                     attributes.put("birth", userInfo.getBirth());
+                    attributes.put("roleIdList", userInfo.getRoleIdList());
                     attributes.put("authenticated", true);
                     log.info("Query Parameter 토큰 인증 성공 - id: {}", userInfo.getId());
                 } else {

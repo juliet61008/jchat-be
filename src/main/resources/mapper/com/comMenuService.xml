@@ -3,23 +3,64 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.jchat.com.mapper.ComMenuMapper">
-    <sql id="selectComMenu">
-        id, parent_id
-        , menu_name
-        , menu_url
-        , menu_order
-        , depth
-        , description
-        , use_yn
-    </sql>
-
     <select id="searchComMenuList" resultType="com.jchat.com.dto.ComMenuListSearchResDto">
-        select
-            <include refid="selectComMenu" />
-        from
-            com_menu
-        where
-            1 = 1
-
+        WITH RECURSIVE menu_tree AS (
+            /* 최상위 메뉴 (depth = 1) */
+            SELECT
+                menu_id
+                , parent_menu_id
+                , menu_cd
+                , menu_name
+                , menu_url
+                , menu_order
+                , menu_depth
+                , menu_desc
+                , ARRAY[menu_order] as sort_path
+            FROM
+                com_menu
+            WHERE
+                menu_depth = 1
+              AND parent_menu_id IS NULL
+              AND use_yn = 'Y'
+            UNION ALL
+            /* 하위 메뉴 */
+            SELECT
+                a1.menu_id
+                , a1.parent_menu_id
+                , a1.menu_cd
+                , a1.menu_name
+                , a1.menu_url
+                , a1.menu_order
+                , a1.menu_depth
+                , a1.menu_desc
+                , b1.sort_path || a1.menu_order  /* 부모 경로 + 현재 order */
+            FROM
+                com_menu a1
+            JOIN
+                menu_tree b1
+            ON a1.parent_menu_id = b1.menu_id
+            WHERE
+                a1.use_yn = 'Y'
+        )
+        SELECT
+            b1.role_id
+            , a1.menu_id
+            , a1.parent_menu_id
+            , a1.menu_cd
+            , a1.menu_name
+            , a1.menu_url
+            , a1.menu_order
+            , a1.menu_depth
+            , a1.menu_desc
+            , a1.sort_path
+        FROM
+            menu_tree a1
+        join
+            com_menu_role b1
+        on
+            a1.menu_id = b1.menu_id
+        ORDER BY
+            b1.role_id
+            , a1.sort_path
     </select>
 </mapper>

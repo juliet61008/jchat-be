@@ -59,6 +59,7 @@ public class JwtInterceptor implements HandlerInterceptor {
                 request.setAttribute("userNo", userInfo.getUserNo());
                 request.setAttribute("name", userInfo.getName());
                 request.setAttribute("birth", userInfo.getBirth());
+                request.setAttribute("roleIdList", userInfo.getRoleIdList());
             }
 
             return true;
@@ -86,6 +87,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         request.setAttribute("userNo", userInfo.getUserNo());
         request.setAttribute("name", userInfo.getName());
         request.setAttribute("birth", userInfo.getBirth());
+        request.setAttribute("roleIdList", userInfo.getRoleIdList());
 
         return true;
     }
