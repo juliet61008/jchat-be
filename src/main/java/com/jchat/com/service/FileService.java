@@ -33,6 +33,14 @@ public class FileService {
 
             String key = String.format("%s/%s", path, fileName);
 
+            if (path.startsWith("/")) {
+                // 패스 / 붙여서 온 경우
+                key = key.substring(1);
+            } else {
+                // 패스 / 안붙여서 온 경우
+                path = "/" + path;
+            }
+
             long size = file.getSize();
 
             // 5MB
