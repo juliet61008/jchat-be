@@ -40,7 +40,9 @@ public class MemFriendService {
 
         // 대표프로필이미지
         for (ComOtherUser otherUser : comOtherUser) {
-            otherUser.setProfileImgUrl(cdnHost + otherUser.getProfileImgUrl());
+            if (otherUser.getProfileImgUrl() != null) {
+                otherUser.setProfileImgUrl(cdnHost + otherUser.getProfileImgUrl());
+            }
         }
 
         return SearchFriendListResDto.builder()
