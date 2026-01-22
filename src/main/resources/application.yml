@@ -57,3 +57,8 @@ cors:
 cookie:
   same-site: None
   secure: true
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  base-url: https://generativelanguage.googleapis.com/v1beta
+  default-model: gemini-2.5-flash
