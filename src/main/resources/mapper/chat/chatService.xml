@@ -326,4 +326,48 @@
                 b1.msg_id
     </select>
 
+    <select id="searchExistsChatRoom" resultType="java.lang.String">
+        /* [chatService.searchExistsChatRoom] 채팅방 유뮤 조회 [juliet61008/26.01.22] */
+        with
+            tbo_chat_room_mine as (
+                select
+                    a1.room_id
+                from
+                    tbo_chat_room a1
+                        join tbo_chat_room_user b1
+                             on
+                                 a1.room_id = b1.room_id
+                where
+                    a1.del_yn = 'N'
+                  and a1.room_cd = '01'
+                  and b1.user_no = #{userNo})
+                ,
+            tbo_chat_room_friend as (
+                select
+                    a1.room_id
+                from
+                    tbo_chat_room a1
+                        join tbo_chat_room_user b1
+                             on
+                                 a1.room_id = b1.room_id
+                where
+                    a1.del_yn = 'N'
+                  and a1.room_cd = '01'
+                  and b1.user_no = #{friendUserNo}
+            )
+        select
+            case
+                when exists (
+                    select
+                        1
+                    from
+                        tbo_chat_room_mine a1
+                            join tbo_chat_room_friend b1
+                                 on
+                                     a1.room_id = b1.room_id)
+                    then 'Y'
+                else 'N'
+                end
+    </select>
+
 </mapper>
