@@ -1,0 +1,38 @@
+# 테스트 환경 전용 설정
+# 실제 DB, 외부 API 연결 없이 슬라이스 테스트(WebMvcTest 등)가 동작하도록
+# 필수 프로퍼티에 테스트용 더미 값을 제공합니다.
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+server:
+  port: 8080
+
+jwt:
+  secret: test-secret-key-must-be-at-least-32-chars-long
+  access-token-validity: 3600000
+  refresh-token-validity: 604800000
+
+cookie:
+  same-site: None
+  secure: false
+
+cors:
+  allowed-origins: http://localhost:3000
+
+cloudflare:
+  r2:
+    access-key: test-access-key
+    secret-key: test-secret-key
+    endpoint: https://test.r2.cloudflarestorage.com
+    bucket: test-bucket
+    cdn-host: https://test-cdn.example.com
+
+gemini:
+  api-key: test-gemini-key
+  base-url: https://generativelanguage.googleapis.com/v1beta
+  default-model: gemini-2.5-flash
