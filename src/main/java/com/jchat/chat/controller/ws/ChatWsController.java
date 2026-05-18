@@ -107,7 +107,7 @@ public class ChatWsController {
                 , ReadMsgResDto.builder()
                         .roomId(roomId)
                         .userNo(userContext.getUserNo())
-                        .lastReadMsgNo(reqDto.getLastReadMsgId())
+                        .lastReadMsgId(reqDto.getLastReadMsgId())
                         .lastReadCreateTm(LocalDateTime.now())
                         .build()
         );
