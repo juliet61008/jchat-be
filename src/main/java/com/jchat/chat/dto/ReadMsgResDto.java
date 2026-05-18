@@ -21,7 +21,7 @@ public class ReadMsgResDto {
     // 유저 번호
     private Long userNo;
     // 마지막 조회 메세지 번호
-    private Long lastReadMsgNo;
+    private Long lastReadMsgId;
     // 마지막 조회 생성 날짜
     private LocalDateTime lastReadCreateTm;
 }
